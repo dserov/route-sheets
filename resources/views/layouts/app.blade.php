@@ -47,13 +47,10 @@
                                 </a>
                             </div>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">{{ __('Menu1') }}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">{{ __('Menu2') }}</a>
-                        </li>
 
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin::profile::index') }}">{{ __('Users') }}</a>
+                        </li>
                     </ul>
 
                     <!-- Right Side Of Navbar -->

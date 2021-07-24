@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use \App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +41,19 @@ Route::get('/sheetdetail/{sheet}', [App\Http\Controllers\SheetDetailController::
 
 Route::get('/sheetdetail/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'listBySheetDetailId'])->name('sheet_detail::detail_photo::list_by_sheet_detail');
 Route::post('/sheetdetail/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'store'])->name('sheet_detail::detail_photo::upload_photos');
+
+Route::group([
+    'prefix' => '/admin/profile',
+    'as' => 'admin::profile::',
+    'middleware' => ['auth'],
+], function () {
+    Route::get('/', [AdminProfileController::class, 'index'])->name('index');
+    Route::get('/import', [AdminProfileController::class, 'import'])->name('import');
+    Route::get('/create', [AdminProfileController::class, 'create'])->name('create');
+    Route::get('/update/{user}', [AdminProfileController::class, 'update'])->name('update');
+    Route::get('/delete/{user}', [AdminProfileController::class, 'destroy'])->name('delete');
+    Route::post('/save', [AdminProfileController::class, 'save'])->name('save');
+});
 
 Route::get('/storage/{file}', function ($fileName) {
     if (! \Storage::disk('public')->has($fileName)) {
