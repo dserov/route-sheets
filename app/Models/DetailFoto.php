@@ -26,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto whereUpdatedAt($value)
  * @mixin \Eloquent
  * @property-read \App\Models\SheetDetail $sheet_detail
+ * @property string|null $description описание
+ * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto whereDescription($value)
  */
 class DetailFoto extends Model
 {

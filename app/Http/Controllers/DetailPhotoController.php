@@ -10,6 +10,7 @@ class DetailPhotoController extends Controller
 {
     public function listBySheetDetailId(SheetDetail $sheetDetail)
     {
+        $this->authorize('view', $sheetDetail);
         $photos = $sheetDetail->detail_fotos()->paginate();
         return \View::make('detail_photo.index', [
             'sheet_detail' => $sheetDetail,
@@ -19,6 +20,7 @@ class DetailPhotoController extends Controller
 
     public function store(Request $request, SheetDetail $sheetDetail)
     {
+        $this->authorize('view', $sheetDetail);
         $request->validate([
             'images' => 'required',
         ]);

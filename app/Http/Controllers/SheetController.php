@@ -13,10 +13,16 @@ class SheetController extends Controller
      * Show the application dashboard.
      *
      * @return \Illuminate\Contracts\Support\Renderable
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function index()
+    public function index(Request $request)
     {
-        $sheets = Sheet::orderByDesc('data')->paginate(20);
+        if ($request->user()->can('viewAny', Sheet::class)) {
+            $sheets = Sheet::orderByDesc('data')->paginate(20);
+        } else {
+            $sheets = Sheet::orderByDesc('data')->where('user_id', \Auth::id())->paginate(20);
+        }
+
         return view('sheet.index', [
             'sheets' => $sheets,
         ]);
@@ -37,17 +43,18 @@ class SheetController extends Controller
 
         $html = \View::make('sheet', [ 'sheets' => $sheets ])->render();
         return response()->json(['html' => $html]);
-//        return response()->json($sheets);
     }
 
     public function delete(Sheet $sheet, Request $request)
     {
+        $this->authorize('delete', $sheet);
         $sheet->delete();
         return back()->with('status', __('List deleted'));
     }
 
     public function update(Sheet $sheet)
     {
+        $this->authorize('update', $sheet);
         $drivers = User::where('is_driver', true)
             ->get(['id', 'name'])
             ->pluck('name', 'id');
@@ -62,6 +69,7 @@ class SheetController extends Controller
 
     public function store(SheetRequest $request, Sheet $sheet)
     {
+        $this->authorize('update', $sheet);
         $sheet->fill($request->validated());
         $sheet->saveOrFail();
         return response()->redirectToRoute('sheet::index')->with('status', __('Sheet saved!'));

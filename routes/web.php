@@ -35,6 +35,9 @@ Route::group([
 
     // delete sheet
     Route::delete('/{sheet}', [App\Http\Controllers\SheetController::class, 'delete'])->name('delete');
+
+    // show content sheet
+    Route::get('/{sheet}/sheet_detail', [App\Http\Controllers\SheetDetailController::class, 'show'])->name('sheet_detail');
 });
 
 
@@ -43,8 +46,6 @@ Route::group([
     'as' => 'sheet_detail::',
     'middleware' => ['auth'],
 ], function () {
-    // show content sheet
-    Route::get('/{sheet}', [App\Http\Controllers\SheetDetailController::class, 'show'])->name('show');
 
     Route::get('/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'listBySheetDetailId'])->name('detail_photo::list_by_sheet_detail');
     Route::post('/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'store'])->name('detail_photo::upload_photos');

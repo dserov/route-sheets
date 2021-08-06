@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Sheet;
+use App\Models\SheetDetail;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class SheetPolicy
+class SheetDetailPolicy
 {
     use HandlesAuthorization;
 
@@ -18,19 +18,20 @@ class SheetPolicy
      */
     public function viewAny(User $user)
     {
-        return $user->is_admin || $user->is_logistic;
+        return ($user->is_admin || $user->is_logistic);
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Sheet  $sheet
+     * @param  \App\Models\SheetDetail  $sheetDetail
      * @return mixed
      */
-    public function view(User $user, Sheet $sheet)
+    public function view(User $user, SheetDetail $sheetDetail)
     {
-        return $user->id == $sheet->user_id;
+        return ($user->is_admin || $user->is_logistic)
+            || $user->id == $sheetDetail->sheet->user_id;
     }
 
     /**
@@ -41,54 +42,54 @@ class SheetPolicy
      */
     public function create(User $user)
     {
-        return $user->is_admin || $user->is_logistic;
+        return ($user->is_admin || $user->is_logistic);
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Sheet  $sheet
+     * @param  \App\Models\SheetDetail  $sheetDetail
      * @return mixed
      */
-    public function update(User $user, Sheet $sheet)
+    public function update(User $user, SheetDetail $sheetDetail)
     {
-        return $user->is_admin || $user->is_logistic;
+        return ($user->is_admin || $user->is_logistic);
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Sheet  $sheet
+     * @param  \App\Models\SheetDetail  $sheetDetail
      * @return mixed
      */
-    public function delete(User $user, Sheet $sheet)
+    public function delete(User $user, SheetDetail $sheetDetail)
     {
-        return $user->is_admin || $user->is_logistic;
+        return ($user->is_admin || $user->is_logistic);
     }
 
     /**
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Sheet  $sheet
+     * @param  \App\Models\SheetDetail  $sheetDetail
      * @return mixed
      */
-    public function restore(User $user, Sheet $sheet)
+    public function restore(User $user, SheetDetail $sheetDetail)
     {
-        return $user->is_admin || $user->is_logistic;
+        return ($user->is_admin || $user->is_logistic);
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Sheet  $sheet
+     * @param  \App\Models\SheetDetail  $sheetDetail
      * @return mixed
      */
-    public function forceDelete(User $user, Sheet $sheet)
+    public function forceDelete(User $user, SheetDetail $sheetDetail)
     {
-        return $user->is_admin || $user->is_logistic;
+        return ($user->is_admin || $user->is_logistic);
     }
 }

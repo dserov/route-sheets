@@ -9,6 +9,8 @@ class SheetDetailController extends Controller
 {
     public function show(Sheet $sheet)
     {
+        $this->authorize('view', $sheet);
+
         $sheet_details = $sheet->sheet_details()->with(['detail_fotos'])->paginate(10);
 
         return \View::make('sheet_detail.index', [

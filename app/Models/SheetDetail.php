@@ -69,7 +69,7 @@ class SheetDetail extends Model
 
     public function sheet(): belongsTo
     {
-        return $this->belongsTo(SheetDetail::class);
+        return $this->belongsTo(Sheet::class);
     }
 
     public function detail_fotos(): hasMany

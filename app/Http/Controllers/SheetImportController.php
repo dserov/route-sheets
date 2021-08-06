@@ -11,6 +11,7 @@ class SheetImportController extends Controller
 {
     public function import(Request $request)
     {
+        $this->authorize('create', Sheet::class);
         if ($request->hasFile('route_sheet') == false) {
             return back()->withErrors(['List not imported']);
         }
@@ -118,6 +119,7 @@ class SheetImportController extends Controller
 
     public function showImportForm()
     {
+        $this->authorize('create', Sheet::class);
         return \View::make('sheet.import');
     }
 }

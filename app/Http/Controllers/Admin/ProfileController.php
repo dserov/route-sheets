@@ -17,7 +17,7 @@ class ProfileController extends Controller
 
     public function index()
     {
-        if (\request()->user()->can('create', \Auth::user())) {
+        if (\request()->user()->can('create', User::class)) {
             $users = User::all();
         } else {
             $users = [\Auth::user()];
@@ -29,13 +29,13 @@ class ProfileController extends Controller
 
     public function create()
     {
-        $this->authorize('create', \Auth::user());
+        $this->authorize('create', User::class);
         return view('admin.profile.update');
     }
 
     public function update(Request $request, User $user)
     {
-        $this->authorize('update', \Auth::user());
+        $this->authorize('update', $user);
         if (empty($user->avatar)) {
             $user->avatar = 'https://via.placeholder.com/150';
         }
@@ -45,8 +45,10 @@ class ProfileController extends Controller
 
     public function save(SaveUserRequest $request)
     {
-        $this->authorize('update', \Auth::user());
         $user = User::findOrNew($request->input('id'));
+
+        $this->authorize('update', $user);
+
         $data = $request->except(['password', 'is_admin', 'is_logistic', 'is_driver', 'avatar']);
         if ($request->input('password')) {
             $data['password'] = \Hash::make($request->input('password'));
@@ -87,7 +89,7 @@ class ProfileController extends Controller
 
     public function import()
     {
-        $this->authorize('create', \Auth::user());
+        $this->authorize('create', User::class);
         $content = file_get_contents(storage_path('app\public') . DIRECTORY_SEPARATOR . 'drivers.txt');
         $lines = explode("\r\n", $content);
         $data = [];

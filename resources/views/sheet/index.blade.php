@@ -28,7 +28,9 @@
                                 {{ $sheets->links() }}
                             </div>
                             <div>
-                                <a href="{{route('sheet::import_form')}}" class="btn btn-primary">Импорт</a>
+                                @can('create', \App\Models\Sheet::class)
+                                    <a href="{{route('sheet::import_form')}}" class="btn btn-primary">Импорт</a>
+                                @endcan
                             </div>
                         </div>
                         <table class="table table-striped table-hover">

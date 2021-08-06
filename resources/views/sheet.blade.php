@@ -3,24 +3,28 @@
         <th scope="row">{{ $sheet->nomer }}</th>
         <td>{{ $sheet->data }}</td>
         <td>
-            <a href="{{ route('sheet_detail::show', [ $sheet ]) }}" class="">{{ $sheet->name }}</a>
+            <a href="{{ route('sheet::sheet_detail', [ $sheet ]) }}" class="">{{ $sheet->name }}</a>
         </td>
         <td>@if(!empty($sheet->user)) {{ $sheet->user->name }}@endif</td>
         <td>
-            <a href="{{ route('sheet::update', [ $sheet ]) }}"
-               class="btn btn-outline-info">Редактор
-            </a>
-            <a class="ml-1 btn btn-danger" rel="nofollow" href="#"
-               onclick="event.preventDefault();
-                       if (confirm('Удалить маршрутный лист #{{ $sheet->id }}?')) { document.getElementById('delete-sheet-{{ $sheet->id }}').submit(); }">
-                Удалить
-            </a>
-            <form id="delete-sheet-{{ $sheet->id }}"
-                  action="{{ route('sheet::delete', [$sheet]) }}" method="POST"
-                  class="d-none">
-                @method('DELETE')
-                @csrf
-            </form>
+            @can('update', $sheet)
+                <a href="{{ route('sheet::update', [ $sheet ]) }}"
+                   class="btn btn-outline-info">Редактор
+                </a>
+            @endcan
+            @can('delete', $sheet)
+                <a class="ml-1 btn btn-danger" rel="nofollow" href="#"
+                   onclick="event.preventDefault();
+                           if (confirm('Удалить маршрутный лист #{{ $sheet->id }}?')) { document.getElementById('delete-sheet-{{ $sheet->id }}').submit(); }">
+                    Удалить
+                </a>
+                <form id="delete-sheet-{{ $sheet->id }}"
+                      action="{{ route('sheet::delete', [$sheet]) }}" method="POST"
+                      class="d-none">
+                    @method('DELETE')
+                    @csrf
+                </form>
+            @endcan
         </td>
     </tr>
 @empty

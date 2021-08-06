@@ -30,6 +30,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\SheetDetail[] $sheet_details
  * @property-read int|null $sheet_details_count
  * @property-read \App\Models\User $user
+ * @property int|null $user_id
+ * @method static \Illuminate\Database\Eloquent\Builder|Sheet whereUserId($value)
  */
 class Sheet extends Model
 {
