@@ -57,7 +57,8 @@ Route::group([
     'middleware' => ['auth'],
 ], function () {
     Route::get('/', [AdminProfileController::class, 'index'])->name('index');
-    Route::get('/import', [AdminProfileController::class, 'import'])->name('import');
+    Route::get('/import', [AdminProfileController::class, 'showImportForm'])->name('import_form');
+    Route::post('/import', [AdminProfileController::class, 'import'])->name('import');
     Route::get('/create', [AdminProfileController::class, 'create'])->name('create');
     Route::get('/update/{user}', [AdminProfileController::class, 'update'])->name('update');
     Route::get('/delete/{user}', [AdminProfileController::class, 'destroy'])->name('delete');

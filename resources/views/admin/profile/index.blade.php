@@ -31,7 +31,7 @@
                         @endif
                         @can ('create', \App\Models\User::class)
                             <a href="{{route('admin::profile::create')}}" class="btn btn-dark mb-4" style="max-width: 150px">{!! __('Add new user') !!}</a>
-                            <a href="{{route('admin::profile::import')}}" class="btn btn-dark mb-4" style="max-width: 150px">{!! __('Import users') !!}</a>
+                            <a href="{{route('admin::profile::import_form')}}" class="btn btn-dark mb-4" style="max-width: 150px">{!! __('Import users') !!}</a>
                         @endcan
                         <div id="cards_list">
                             @foreach($users as $user)

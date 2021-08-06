@@ -87,14 +87,21 @@ class ProfileController extends Controller
             ->with('success', 'Пользователь удален!');
     }
 
-    public function import()
+    public function import(Request $request)
     {
-//        $this->authorize('create', User::class);
-        echo('12');
-        $content = file_get_contents(storage_path('app\public') . DIRECTORY_SEPARATOR . 'drivers.txt');
-        echo('23');
+        $this->authorize('create', User::class);
+
+        $request->validate([
+            'driver' => 'required',
+        ]);
+
+        $content = '';
+
+        if ($request->hasfile('driver')) {
+            $file = $request->file('driver');
+            $content = $file->get();
+        }
         $lines = explode("\r\n", $content);
-        die(implode(',', $lines));
         $data = [];
         $password = \Hash::make('top_secret');
         foreach ($lines as $line) {
@@ -132,7 +139,7 @@ class ProfileController extends Controller
         }
 
         User::insert($data);
-        return 'Users imported';
+        return 'Drivers imported';
     }
 
     private function _getUniqueFileName($name)
@@ -150,5 +157,11 @@ class ProfileController extends Controller
         $ext = pathinfo($name, PATHINFO_EXTENSION);
         $name = \Str::random(16) . ($ext ? "." . $ext : "");
         return \Str::lower($name);
+    }
+
+    public function showImportForm()
+    {
+        $this->authorize('create', User::class);
+        return \View::make('admin.profile.import');
     }
 }
