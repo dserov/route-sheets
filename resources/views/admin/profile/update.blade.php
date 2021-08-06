@@ -1,99 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-    <style>
-        .gallery__ramka {
-            margin: 5px;
-            width: 150px;
-            height: 150px;
-            cursor: pointer;
-        }
-
-        .gallery__img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .file_upload {
-            position: relative;
-            overflow: hidden;
-            font-size: 1em; /* example */
-            height: 2em; /* example */
-            line-height: 2em /* the same as height */
-        }
-
-        .file_upload > button {
-            float: right;
-            width: 8em; /* example */
-            height: 100%
-        }
-
-        .file_upload > div {
-            padding-left: 1em /* example */
-        }
-
-        @media only screen and ( max-width: 500px ) {
-            /* example */
-            .file_upload > div {
-                display: none
-            }
-
-            .file_upload > button {
-                width: 100%
-            }
-        }
-
-        .file_upload input[type=file] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            transform: scale(20);
-            letter-spacing: 10em; /* IE 9 fix */
-            -ms-transform: scale(20); /* IE 9 fix */
-            opacity: 0;
-            cursor: pointer
-        }
-
-        /* Making it beautiful */
-
-        .file_upload {
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.1s linear
-        }
-
-        .file_upload.focus {
-            box-shadow: 0 0 5px rgba(0, 30, 255, 0.4)
-        }
-
-        .file_upload > button {
-            background: #7300df;
-            transition: background 0.2s;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-            border-radius: 2px;
-            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05);
-            color: #fff;
-            text-shadow: #6200bd 0 -1px 0;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis
-        }
-
-        .file_upload:hover > button {
-            background: #6200bd;
-            text-shadow: #5d00b3 0 -1px 0
-        }
-
-        .file_upload:active > button {
-            background: #5d00b3;
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.3) inset
-        }
-    </style>
     <div class="container">
         <div class="row">
             <div class="col">
@@ -126,14 +33,11 @@
                                 {!! Form::label('user_avatar', __('Avatar'), ['class' => 'col-md-6 col-form-label text-md-right']) !!}
                             </div>
                             <div class="col-md-6">
-                                <div class="gallery__ramka">
+                                <div class="gallery__ramka file_upload">
                                     <img src="{{ old('avatar') }}" class="gallery__img img-thumbnail" id="preview"
                                          alt="{{ __('Avatar') }}">
-                                </div>
-                                <div class="file_upload">
-                                    {{--<button type="button">Выбрать</button>--}}
-                                    <div>Файл не выбран</div>
                                     {!! Form::input('file', 'avatar', '', ['id' => 'user_avatar', 'placeholder' => __('Avatar') . ' ...']) !!}
+                                    <div>Файл не выбран</div>
                                 </div>
                                 @error('user_name')
                                 <div class="alert alert-danger">{{$message}}</div>
@@ -157,6 +61,16 @@
                                 {!! Form::input('text', 'email', old('email'), ['id' => 'user_email', 'placeholder' => __('labels.user_email') . ' ...', 'class' => 'form-control']) !!}
                             </div>
                             @error('email')
+                            <div class="alert alert-danger">{{$message}}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group row">
+                            {!! Form::label('user_phone', __('labels.user_phone'), ['class' => 'col-md-6 col-form-label text-md-right']) !!}
+                            <div class="col-md-6">
+                                {!! Form::input('text', 'phone', old('phone'), ['id' => 'user_phone', 'placeholder' => __('labels.user_phone') . ' ...', 'class' => 'form-control']) !!}
+                            </div>
+                            @error('phone')
                             <div class="alert alert-danger">{{$message}}</div>
                             @enderror
                         </div>
@@ -220,7 +134,7 @@
                         <div class="form-group row">
                             {!! Form::label('user_current_password', __('labels.user_current_password'), ['class' => 'col-md-6 col-form-label text-md-right']) !!}
                             <div class="col-md-6">
-                                {!! Form::input('password', 'current_password', '', ['id' => 'user_current_password', 'placeholder' => __('labels.user_current_password') . ' ...', 'class' => 'form-control is-invalid']) !!}
+                                {!! Form::input('password', 'current_password', '', ['id' => 'user_current_password', 'placeholder' => __('labels.user_current_password') . ' ...', 'class' => 'form-control']) !!}
                             </div>
                             @error('current_password')
                             <div class="badge badge-danger">{{$message}}</div>

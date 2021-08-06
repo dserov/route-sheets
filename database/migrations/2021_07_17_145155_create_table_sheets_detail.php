@@ -28,6 +28,11 @@ class CreateTableSheetsDetail extends Migration
             $table->float('count_general')->comment('количество общии')->nullable();
             $table->string('mark')->comment('отметка')->nullable();
             $table->timestamps();
+            $table->foreign('sheet_id', 'fk_sheet_id')
+                ->references('id')
+                ->on('sheets')
+                ->cascadeOnDelete()
+                ->onUpdate('restrict');
         });
     }
 

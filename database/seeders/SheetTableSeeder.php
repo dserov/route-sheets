@@ -14,6 +14,6 @@ class SheetTableSeeder extends Seeder
      */
     public function run()
     {
-        Sheet::factory(10)->create();
+        Sheet::factory(5)->create();
     }
 }

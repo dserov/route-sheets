@@ -1,43 +1,48 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col">
                 <div class="card">
-                    <div class="card-header">{{ __('Dashboard') }}</div>
+                    <div class="card-header d-md-flex">
+                        <div class="flex-grow-1">
+                            {{ __('Dashboard') }}
+                        </div>
+                        <form class="form-inline my-2 my-lg-0">
+                            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"
+                                   id="search_input">
+                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit" style="display: none">
+                                Search
+                            </button>
+                        </form>
+                    </div>
                     <div class="card-body">
                         @if (session('status'))
                             <div class="alert alert-success" role="alert">
                                 {{ session('status') }}
                             </div>
                         @endif
-                        {{ $sheets->links() }}
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                {{ $sheets->links() }}
+                            </div>
+                            <div>
+                                <a href="{{route('sheet::import_form')}}" class="btn btn-primary">Импорт</a>
+                            </div>
+                        </div>
                         <table class="table table-striped table-hover">
                             <thead>
-                            <tr>
-                                <th scope="col">#</th>
+                            <tr class="d-sm-table-row d-flex flex-column">
                                 <th scope="col">Номер</th>
                                 <th scope="col">Дата</th>
                                 <th scope="col">Наименование</th>
+                                <th scope="col">Водитель</th>
                                 <th scope="col"></th>
                             </tr>
                             </thead>
                             <tbody>
-                            @forelse($sheets as $sheet)
-                                <tr>
-                                    <th scope="row">{{ $sheet->id }}</th>
-                                    <td>{{ $sheet->nomer }}</td>
-                                    <td>{{ $sheet->data }}</td>
-                                    <td>{{ $sheet->name }}</td>
-                                    <td><a href="{{ route('sheet_detail::show', [ 'sheet' => $sheet ]) }}" class="btn btn-outline-info">Детали</a></td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td colspan="4">Data not found</td>
-                                </tr>
-                            @endforelse
+                                @include('sheet')
                             </tbody>
                         </table>
                     </div>
@@ -45,4 +50,24 @@
             </div>
         </div>
     </div>
+    <script>
+        window.addEventListener('load', function () {
+
+            let handleSearch = function() {
+                let $value = $(this).val();
+                $.ajax({
+                    type : 'get',
+                    url : '{{ route('sheet::search') }}',
+                    data:{'search': $value},
+                    success: function(data){
+                        $('tbody').html(data.html);
+                    }
+                });
+            };
+
+
+            $('#search_input').on('keyup', handleSearch);
+            $('#search_input').on('search', handleSearch);
+        });
+    </script>
 @endsection

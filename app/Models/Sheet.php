@@ -35,6 +35,13 @@ class Sheet extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'nomer',
+        'data',
+        'user_id',
+    ];
+
     public function sheet_details(): hasMany
     {
         return $this->hasMany(SheetDetail::class);

@@ -17,7 +17,6 @@
                         <table class="table table-striped table-hover">
                             <thead>
                             <tr>
-                                <th scope="col">#</th>
                                 <th scope="col">№ п/п</th>
                                 <th scope="col">Контрагент</th>
                                 <th scope="col">Площадка</th>
@@ -27,8 +26,7 @@
                             <tbody>
                             @forelse($sheet_details as $sheet_detail)
                                 <tr>
-                                    <th scope="row">{{ $sheet_detail->id }}</th>
-                                    <td>{{ $sheet_detail->npp }}</td>
+                                    <th scope="row">{{ $sheet_detail->npp }}</th>
                                     <td>{{ $sheet_detail->contragent }}</td>
                                     <td>{{ $sheet_detail->playground }}</td>
                                     <td><a href="{{ route('sheet_detail::detail_photo::list_by_sheet_detail', [ 'sheetDetail' => $sheet_detail ]) }}" class="btn btn-info position-relative">Фотографии

@@ -30,7 +30,7 @@ class SaveUserRequest extends FormRequest
             'password' => 'required_without:id|confirmed', // должен быть заполнен, если пустой ИД, т.е. новый юзер
             'current_password' => [
                 'required',
-                // проверка текущего пароля ;)
+//                 проверка текущего пароля ;)
                 function ($attribute, $value, $fail) {
                     if (! Hash::check($value, \Auth::user()->password)) {
                         $fail( __('Current password is invalid') );
@@ -52,6 +52,7 @@ class SaveUserRequest extends FormRequest
             'is_admin' => __('User is admin'),
             'is_driver' => __('User is driver'),
             'is_logistic' => __('User is logistic'),
+            'phone' => __('Phone'),
         ];
     }
 }

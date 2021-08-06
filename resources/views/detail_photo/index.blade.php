@@ -1,26 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-    <style>
-        .gallery {
-            overflow: hidden;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .gallery .gallery__ramka {
-            margin: 5px;
-            width: 300px;
-            height: 300px;
-            cursor: pointer;
-        }
-
-        .gallery .gallery__img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col">

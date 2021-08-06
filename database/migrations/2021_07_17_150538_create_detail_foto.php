@@ -20,6 +20,11 @@ class CreateDetailFoto extends Migration
             $table->string('description')->comment('описание')->nullable();
             $table->string('path')->comment('относительный путь')->nullable();
             $table->timestamps();
+            $table->foreign('sheet_detail_id', 'fk_sheet_detail_id')
+                ->references('id')
+                ->on('sheet_details')
+                ->cascadeOnDelete()
+                ->onUpdate('restrict');
         });
     }
 

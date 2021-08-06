@@ -14,36 +14,44 @@ use \App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 |
 */
 
-Route::redirect('/', '/sheets');
-
-Route::get('/w', function () {
-    $publicPath = storage_path('app\public');
-
-    $spreadSheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($publicPath . "/1.xls");
-    $dataArray = $spreadSheet->getActiveSheet()
-        ->rangeToArray(
-            'A1:K150',     // The worksheet range that we want to retrieve
-            NULL,        // Value that should be returned for empty cells
-            TRUE,        // Should formulas be calculated (the equivalent of getCalculatedValue() for each cell)
-            TRUE,        // Should values be formatted (the equivalent of getFormattedValue() for each cell)
-            TRUE         // Should the array be indexed by cell row and cell column
-        );
-    dd($dataArray);
-
-    return view('welcome');
-});
+Route::redirect('/', '/sheet');
 
 Auth::routes();
 
-Route::get('/sheets', [App\Http\Controllers\SheetController::class, 'index'])->name('sheets::index');
-Route::get('/sheets/load', [App\Http\Controllers\SheetController::class, 'loadNew'])->name('sheets::load');
-Route::get('/sheetdetail/{sheet}', [App\Http\Controllers\SheetDetailController::class, 'show'])->name('sheet_detail::show');
+Route::group([
+    'prefix' => 'sheet',
+    'as' => 'sheet::',
+    'middleware' => ['auth'],
+], function (){
+    Route::get('/', [App\Http\Controllers\SheetController::class, 'index'])->name('index');
+    Route::get('/search', [App\Http\Controllers\SheetController::class, 'search'])->name('search');
 
-Route::get('/sheetdetail/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'listBySheetDetailId'])->name('sheet_detail::detail_photo::list_by_sheet_detail');
-Route::post('/sheetdetail/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'store'])->name('sheet_detail::detail_photo::upload_photos');
+    Route::get('/xls', [App\Http\Controllers\SheetImportController::class, 'showImportForm'])->name('import_form');
+    Route::post('/xls', [App\Http\Controllers\SheetImportController::class, 'import'])->name('import_save');
+
+    // set driver id
+    Route::get('/{sheet}', [App\Http\Controllers\SheetController::class, 'update'])->name('update');
+    Route::put('/{sheet}', [App\Http\Controllers\SheetController::class, 'store'])->name('store');
+
+    // delete sheet
+    Route::delete('/{sheet}', [App\Http\Controllers\SheetController::class, 'delete'])->name('delete');
+});
+
 
 Route::group([
-    'prefix' => '/admin/profile',
+    'prefix' => 'sheetdetail',
+    'as' => 'sheet_detail::',
+    'middleware' => ['auth'],
+], function () {
+    // show content sheet
+    Route::get('/{sheet}', [App\Http\Controllers\SheetDetailController::class, 'show'])->name('show');
+
+    Route::get('/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'listBySheetDetailId'])->name('detail_photo::list_by_sheet_detail');
+    Route::post('/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'store'])->name('detail_photo::upload_photos');
+});
+
+Route::group([
+    'prefix' => 'admin/profile',
     'as' => 'admin::profile::',
     'middleware' => ['auth'],
 ], function () {

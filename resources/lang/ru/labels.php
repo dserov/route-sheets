@@ -35,6 +35,7 @@ return [
     'edit_user_title' => 'Редактирование профиля',
     'user_name' => 'Имя',
     'user_email' => 'Email',
+    'user_phone' => 'Телефон',
     'user_password' => 'Пароль',
     'user_password_confirmation' => 'Подтверждение пароля',
     'user_current_password' => 'Текущий пароль',

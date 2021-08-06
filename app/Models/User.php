@@ -52,6 +52,7 @@ class User extends Authenticatable
         'is_logistic',
         'created_at',
         'avatar',
+        'phone',
     ];
 
     /**

@@ -53,6 +53,20 @@ class SheetDetail extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'npp',
+        'contragent',
+        'playground',
+        'overflow',
+        'note',
+        'volume',
+        'count_plan',
+        'count_units',
+        'count_fact',
+        'count_general',
+        'mark',
+    ];
+
     public function sheet(): belongsTo
     {
         return $this->belongsTo(SheetDetail::class);

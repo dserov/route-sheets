@@ -14,6 +14,6 @@ class SheetDetailTableSeeder extends Seeder
      */
     public function run()
     {
-        SheetDetail::factory(100)->create();
+        SheetDetail::factory(10)->create();
     }
 }

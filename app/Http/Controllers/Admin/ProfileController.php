@@ -7,7 +7,6 @@ use App\Http\Requests\SaveUserRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use function PHPUnit\Framework\isNull;
 
 class ProfileController extends Controller
 {
@@ -21,7 +20,7 @@ class ProfileController extends Controller
         if (\request()->user()->can('create', \Auth::user())) {
             $users = User::all();
         } else {
-            $users = [ \Auth::user() ];
+            $users = [\Auth::user()];
         }
         return view('admin.profile.index', [
             'users' => $users
@@ -37,7 +36,7 @@ class ProfileController extends Controller
     public function update(Request $request, User $user)
     {
         $this->authorize('update', \Auth::user());
-        if (isNull($user->avatar) ) {
+        if (empty($user->avatar)) {
             $user->avatar = 'https://via.placeholder.com/150';
         }
         $request->replace($user->toArray())->flash();
@@ -48,7 +47,7 @@ class ProfileController extends Controller
     {
         $this->authorize('update', \Auth::user());
         $user = User::findOrNew($request->input('id'));
-        $data = $request->except(['password', 'is_admin', 'is_logistic', 'is_driver']);
+        $data = $request->except(['password', 'is_admin', 'is_logistic', 'is_driver', 'avatar']);
         if ($request->input('password')) {
             $data['password'] = \Hash::make($request->input('password'));
         }
@@ -56,6 +55,13 @@ class ProfileController extends Controller
             $data['is_admin'] = $request->has('is_admin');
             $data['is_driver'] = $request->has('is_driver');
             $data['is_logistic'] = $request->has('is_logistic');
+        }
+
+        if ($request->hasFile('avatar')) {
+            $image = $request->file('avatar');
+            $name = $image->hashName();
+            $name = $this->_getUniqueFileName($name);
+            $data['avatar'] = '/storage/' . $image->storeAs('avatars', $name, 'public');
         }
 
         $user->fill($data);
@@ -79,7 +85,9 @@ class ProfileController extends Controller
             ->with('success', 'Пользователь удален!');
     }
 
-    public function import() {
+    public function import()
+    {
+        $this->authorize('create', \Auth::user());
         $content = file_get_contents(storage_path('app\public') . DIRECTORY_SEPARATOR . 'drivers.txt');
         $lines = explode("\r\n", $content);
         $data = [];
@@ -95,7 +103,7 @@ class ProfileController extends Controller
             $name = implode(' ', $parts);
 
             // make login
-            $parts = array_map(function ($item){
+            $parts = array_map(function ($item) {
                 return \Str::slug($item);
             }, $parts);
 
@@ -120,5 +128,22 @@ class ProfileController extends Controller
 
         User::insert($data);
         return 'Users imported';
+    }
+
+    private function _getUniqueFileName($name)
+    {
+        $folder = storage_path('uploads');
+        $name = $this->_getNewName($name);
+        while (is_file($folder . DIRECTORY_SEPARATOR . $name)) {
+            $name = $this->_getNewName($name);
+        }
+        return $name;
+    }
+
+    private function _getNewName($name)
+    {
+        $ext = pathinfo($name, PATHINFO_EXTENSION);
+        $name = \Str::random(16) . ($ext ? "." . $ext : "");
+        return \Str::lower($name);
     }
 }
