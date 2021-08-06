@@ -89,9 +89,10 @@ class ProfileController extends Controller
 
     public function import()
     {
-        $this->authorize('create', User::class);
+//        $this->authorize('create', User::class);
         $content = file_get_contents(storage_path('app\public') . DIRECTORY_SEPARATOR . 'drivers.txt');
         $lines = explode("\r\n", $content);
+        dd($lines);
         $data = [];
         $password = \Hash::make('top_secret');
         foreach ($lines as $line) {
