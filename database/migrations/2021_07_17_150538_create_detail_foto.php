@@ -19,6 +19,7 @@ class CreateDetailFoto extends Migration
             $table->string('name')->comment('имя файла')->nullable();
             $table->string('description')->comment('описание')->nullable();
             $table->string('path')->comment('относительный путь')->nullable();
+            $table->string('thumb')->comment('иконка')->nullable();
             $table->timestamps();
             $table->foreign('sheet_detail_id', 'fk_sheet_detail_id')
                 ->references('id')

@@ -14,40 +14,30 @@
                                 {{ session('status') }}
                             </div>
                         @endif
-                        @if ($errors->has('files'))
-                            @foreach ($errors->get('files') as $error)
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $error }}</strong>
-                                </span>
+                        @if (count($errors))
+                            @foreach ($errors->all() as $error)
+                                <div class="alert alert-danger" role="alert">
+                                    {{ $error }}
+                                </div>
                             @endforeach
                         @endif
                         {{ $photos->links() }}
                         <div class="gallery">
                             @foreach($photos as $photo)
                                 <div class="gallery__ramka">
-                                    <img src="{{ $photo->path }}" class="gallery__img img-thumbnail"
-                                         alt="{{ $photo->description }}" data-fancybox="gallery">
+                                    <a href="{{ $photo->path }}" data-fancybox="gallery">
+                                        <img src="{{ $photo->thumb }}" class="gallery__img img-thumbnail"
+                                             alt="{{ $photo->description }}">
+                                    </a>
                                 </div>
                             @endforeach
-                            <div class="gallery__ramka">
-                                <div style="
-                                        font-size: 170px;
-                                        background-color: #adadad;
-                                        width: 100%;
-                                        height: 100%;
-                                        display: none;
-                                        justify-content: center;
-                                        align-items: center;
-                                    " class="img-thumbnail">+
-                                </div>
-                            </div>
                         </div>
                         <br>
                         <form action="{{ route('sheet_detail::detail_photo::upload_photos', [ 'sheetDetail' => $sheet_detail ]) }}"
                               method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="form-group">
-                                <input type="file" name="images[]" multiple class="form-control" accept="image/*" >
+                                <input type="file" name="images[]" multiple class="form-control" accept="image/*">
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-success">{{ __('Upload') }}</button>

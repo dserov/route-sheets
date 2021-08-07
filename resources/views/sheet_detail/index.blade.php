@@ -13,7 +13,7 @@
                                 {{ session('status') }}
                             </div>
                         @endif
-                        {{ $sheet_details->links() }}
+                        {{ $sheet_details->onEachSide(5)->links() }}
                         <table class="table table-striped table-hover">
                             <thead>
                             <tr>

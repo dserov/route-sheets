@@ -38,23 +38,9 @@
                 <!-- Left Side Of Navbar -->
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <div class="btn-group">
-                            <a href="{{ route('sheet::index') }}">
-                                <button type="button" class="btn btn-outline-info">{{ __('Sheets') }}</button>
-                            </a>
-                            <button type="button" class="btn btn-outline-info dropdown-toggle dropdown-toggle-split"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{{ route('sheet::import_form') }}">
-                                    {{ __('Load') }}
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin::profile::index') }}">{{ __('Users') }}</a>
+                        <a href="{{ route('sheet::index') }}" class="nav-link">
+                            {{ __('Sheets') }}
+                        </a>
                     </li>
                 </ul>
 
@@ -86,6 +72,10 @@
                             </a>
 
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="{{ route('admin::profile::index') }}">
+                                    {{ __('Users') }}
+                                </a>
+
                                 <a class="dropdown-item" href="{{ route('logout') }}"
                                    onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

@@ -36,6 +36,7 @@ class DetailFoto extends Model
     protected $fillable = [
         'sheet_detail_id',
         'name',
+        'thumb',
         'path',
     ];
 
