@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-md">
         <div class="row justify-content-center">
             <div class="col">
                 <div class="card">
@@ -33,20 +33,20 @@
                                 @endcan
                             </div>
                         </div>
-                        <table class="table table-striped table-hover">
-                            <thead>
-                            <tr class="d-sm-table-row d-flex flex-column">
-                                <th scope="col">Номер</th>
-                                <th scope="col">Дата</th>
-                                <th scope="col">Наименование</th>
-                                <th scope="col">Водитель</th>
-                                <th scope="col"></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                @include('sheet')
-                            </tbody>
-                        </table>
+                        <div class="row border-bottom border-top my-2 py-2 g-2 flex-sm-column flex-md-row">
+                            <div class="col">
+                                <div class="row flex-column flex-sm-row flex-grow-1">
+                                    <div class="col font-weight-bold">Номер</div>
+                                    <div class="col font-weight-bold">Дата</div>
+                                    <div class="col font-weight-bold">Наименование</div>
+                                    <div class="col font-weight-bold">Водитель</div>
+                                </div>
+                            </div>
+                            <div class="col-auto">&nbsp;
+                            </div>
+                        </div>
+
+                        @include('sheet')
                     </div>
                 </div>
             </div>
@@ -55,13 +55,13 @@
     <script>
         window.addEventListener('load', function () {
 
-            let handleSearch = function() {
+            let handleSearch = function () {
                 let $value = $(this).val();
                 $.ajax({
-                    type : 'get',
-                    url : '{{ route('sheet::search') }}',
-                    data:{'search': $value},
-                    success: function(data){
+                    type: 'get',
+                    url: '{{ route('sheet::search') }}',
+                    data: {'search': $value},
+                    success: function (data) {
                         $('tbody').html(data.html);
                     }
                 });
