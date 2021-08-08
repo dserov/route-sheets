@@ -29,9 +29,15 @@ class DetailPhotoController extends Controller
             $images = $request->file('images');
 
             foreach ($images as $image) {
-                $data = $this->_saveFiles($image);
-                $data['sheet_detail_id'] = $sheetDetail->id;
-                if (is_array($data)) {
+                $name = $this->_saveFiles($image);
+                if (is_string($name)) {
+                    $data = [
+                        'name' => $name,
+                        'path' => '/storage/' . self::IMAGE_DIR . '/' . $name,
+                        'thumb' => '/storage/' . self::THUMB_DIR . '/' . $name,
+                        'sheet_detail_id' => $sheetDetail->id,
+                    ];
+
                     DetailFoto::create($data);
                 } else {
                     return back()->withErrors('Foto not uploaded');
@@ -44,21 +50,15 @@ class DetailPhotoController extends Controller
 
     /**
      * @param UploadedFile $image
-     * @return array|bool
+     * @return string|bool
      */
     private function _saveFiles($image)
     {
-        $filePath = '';
-        $thumbPath = '';
+        $filePath = null;
+        $thumbPath = null;
         try {
             $name = $image->hashName();
             $name = $this->_getUniqueFileName($name);
-
-            $result = [
-                'name' => $name,
-                'path' => '/storage/' . self::IMAGE_DIR . '/' . $name,
-                'thumb' => '/storage/' . self::THUMB_DIR . '/' . $name,
-            ];
 
             $basePath = \Storage::disk('public')->path('');
             $filePath = $basePath . self::IMAGE_DIR . DIRECTORY_SEPARATOR . $name;
@@ -78,7 +78,7 @@ class DetailPhotoController extends Controller
 
             // check if images is exists
             if (\File::exists($filePath) && \File::exists($thumbPath)) {
-                return $result;
+                return $name;
             }
             throw new \Exception('');
         } catch (\Exception $e) {
