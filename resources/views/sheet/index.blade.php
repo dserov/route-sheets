@@ -45,8 +45,9 @@
                             <div class="col-auto">&nbsp;
                             </div>
                         </div>
-
-                        @include('sheet')
+                        <div id="sheet_list">
+                            @include('sheet')
+                        </div>
                     </div>
                 </div>
             </div>
@@ -62,7 +63,7 @@
                     url: '{{ route('sheet::search') }}',
                     data: {'search': $value},
                     success: function (data) {
-                        $('tbody').html(data.html);
+                        $('#sheet_list').html(data.html);
                     }
                 });
             };
