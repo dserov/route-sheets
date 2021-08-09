@@ -11,7 +11,7 @@ class SheetDetailController extends Controller
     {
         $this->authorize('view', $sheet);
 
-        $sheet_details = $sheet->sheet_details()->with(['detail_fotos'])->paginate(30);
+        $sheet_details = $sheet->sheet_details()->with(['detail_fotos'])->get();
         $sheet_details->onEachSide = 0;
         return \View::make('sheet_detail.index', [
             'sheet' => $sheet,
