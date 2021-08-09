@@ -76,4 +76,9 @@ class SheetDetail extends Model
     {
         return $this->hasMany(DetailFoto::class);
     }
+
+    public function getFotoCountAttribute()
+    {
+        return $this->detail_fotos()->count();
+    }
 }

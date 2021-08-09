@@ -15,6 +15,7 @@ class SheetImportController extends Controller
 
     public function import(StoreRouteSheetRequest $request)
     {
+        // ini_set('max_file_uploads', 100);
         $this->authorize('create', Sheet::class);
         if (false == $request->hasFile('route_sheets')) {
             return back()->withErrors(['Lists not founded']);
@@ -50,7 +51,7 @@ class SheetImportController extends Controller
 
             $is_header = true;
             $line_no = 1;
-            if (count($active_sheet[0]) != 12) {
+            if (count($active_sheet[0]) != 12 && count($active_sheet[0]) != 11) {
                 return __('List format error!');
             }
             foreach ($active_sheet as $sheet_row) {

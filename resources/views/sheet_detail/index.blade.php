@@ -9,6 +9,8 @@
                         <div class="flex-grow-1">
                             {{ __('Sheet details') }} <strong>&laquo;{{ $sheet->name }}&raquo;</strong><br>
                             № <strong>{{ $sheet->nomer }}</strong> от <strong>{{ $sheet->data }}</strong>
+                            <br>
+                            <strong>Адресов: {{ $sheet_details->count() }}</strong>
                         </div>
                         <div>
                             <button type="button" class="btn btn-outline-secondary" onclick="history.go(-1);">{{ __('Back') }}</button>
