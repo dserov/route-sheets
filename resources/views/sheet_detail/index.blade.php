@@ -20,7 +20,6 @@
                                 {{ session('status') }}
                             </div>
                         @endif
-                        {{ $sheet_details->links() }}
                         <div class="container-fluid">
                             <div class="row border-bottom border-top my-2 py-2">
                                 <div class="col-1 font-weight-bold">№</div>
