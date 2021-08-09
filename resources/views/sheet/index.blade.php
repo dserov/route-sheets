@@ -69,8 +69,8 @@
             };
 
 
-            $('#search_input').on('keyup', _.debounce(handleSearch, 300));
-            $('#search_input').on('search', _.debounce(handleSearch, 300));
+            $('#search_input').on('keyup', _.debounce(handleSearch, 500));
+            $('#search_input').on('search', _.debounce(handleSearch, 500));
         });
     </script>
 @endsection
