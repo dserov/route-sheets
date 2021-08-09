@@ -18,9 +18,9 @@ class SheetController extends Controller
     public function index(Request $request)
     {
         if ($request->user()->can('viewAny', Sheet::class)) {
-            $sheets = Sheet::orderByDesc('data')->paginate(20);
+            $sheets = Sheet::orderByDesc('data')->paginate(30);
         } else {
-            $sheets = Sheet::orderByDesc('data')->where('user_id', \Auth::id())->paginate(20);
+            $sheets = Sheet::orderByDesc('data')->where('user_id', \Auth::id())->paginate(30);
         }
 
         return view('sheet.index', [
