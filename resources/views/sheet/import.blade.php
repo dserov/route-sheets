@@ -23,13 +23,13 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">{!! __('Import new route sheet') !!}</div>
+                    <div class="card-header">{!! __('Import new route sheets') !!}</div>
 
                     <div class="card-body">
                         {!! Form::open(['route' => 'sheet::import_save', 'files' => true]) !!}
                         <div class="form-group row border pb-1">
-                            {!! Form::input('file', 'route_sheet', '', ['id' => 'route_sheet', 'placeholder' => __('Route sheet') . ' ...']) !!}
-                            @error('route_sheet')
+                            {!! Form::input('file', 'route_sheets[]', '', ['multiple' => 'multiple', 'id' => 'route_sheets', 'placeholder' => __('Route sheet') . ' ...']) !!}
+                            @error('route_sheets')
                                 <div class="alert alert-danger">{{$message}}</div>
                             @enderror
                         </div>

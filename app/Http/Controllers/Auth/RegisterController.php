@@ -67,6 +67,7 @@ class RegisterController extends Controller
         // first user will be admin
         $is_admin = User::count() == 0;
         return User::create([
+            'is_driver' => true,
             'is_admin' => $is_admin,
             'name' => $data['name'],
             'email' => $data['email'],

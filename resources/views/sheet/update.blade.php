@@ -53,6 +53,7 @@
                         <div class="form-group row mb-0">
                             <div class="col-md-8 offset-md-4">
                                 {!! Form::submit(__('Save'), ['class' => 'btn btn-primary']) !!}
+                                <button type="button" class="btn btn-outline-secondary ml-4" onclick="history.go(-1);">{{ __('Cancel') }}</button>
                             </div>
                         </div>
                         {!! Form::close() !!}

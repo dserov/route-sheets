@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRouteSheetRequest;
 use App\Models\Sheet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -9,75 +10,101 @@ use Str;
 
 class SheetImportController extends Controller
 {
-    public function import(Request $request)
+    protected $errors = [];
+    protected $success = [];
+
+    public function import(StoreRouteSheetRequest $request)
     {
         $this->authorize('create', Sheet::class);
-        if ($request->hasFile('route_sheet') == false) {
-            return back()->withErrors(['List not imported']);
+        if (false == $request->hasFile('route_sheets')) {
+            return back()->withErrors(['Lists not founded']);
         }
 
-        $xls = $request->file('route_sheet');
-        $tmp_file_name = $xls->getRealPath();
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp_file_name);
-        $active_sheet = $spreadsheet->getActiveSheet()->toArray();
-
-        $sheet = new Sheet();
-        $sheetDetailsList = [];
-
-        $is_header = true;
-        $line_no = 1;
-        if (count($active_sheet[0]) != 12) {
-            return back()->withErrors([__('List format error!')]);
-        }
-        foreach ($active_sheet as $sheet_row) {
-            if ($is_header) {
-                foreach ($sheet_row as $sheet_col) {
-                    if (Str::of($sheet_col)->startsWith('Маршрутный лист № ')) {
-                        // Маршрутный лист № Э0000078623 от 22 июня 2021 г.
-                        $line = (string)Str::of($sheet_col)->replaceFirst('Маршрутный лист № ', '');
-                        $result = $this->parseNomerData($line);
-                        $sheet->nomer = $result['nomer'];
-                        $sheet->data = $result['data'];
-                        continue;
-                    }
-                    if (Str::of($sheet_col)->startsWith('Маршрут №: ')) {
-                        $sheet->name = (string)Str::of($sheet_col)->replaceFirst('Маршрут №: ', '');
-                        continue;
-                    }
-                    if ($sheet_col == '№') {
-                        $is_header = false;
-                    }
-                }
+        foreach ($request->file('route_sheets') as $file) {
+            $tmp_file_name = $file->getRealPath();
+            $result = $this->_importOne($tmp_file_name);
+            if (is_string($result)) {
+                $this->errors[] = $file->getClientOriginalName() . ': ' . $result;
+            } elseif ($result === false) {
+                $this->errors[] = $file->getClientOriginalName() . ': Загрузить не удалось';
             } else {
-                // header is complete
-                if (is_null($sheet_row[0])) {
-                    continue;
-                }
-
-                // fill line
-                if ($sheet_row[0] == $line_no++) {
-                    $sheetDetailsList[] = [
-                        'npp' => $sheet_row[0],
-                        'contragent' => $sheet_row[1],
-                        'playground' => $sheet_row[3],
-                        'overflow' => $sheet_row[4],
-                        'note' => $sheet_row[5],
-                        'volume' => $sheet_row[6],
-                        'count_plan' => $sheet_row[7],
-                        'count_units' => $sheet_row[8],
-                        'count_fact' => $sheet_row[9],
-                        'count_general' => $sheet_row[10],
-                        'mark' => $sheet_row[10],
-                    ];
-                }
+                $this->success[] = $file->getClientOriginalName() . ': Загружен успешно';
             }
         }
-        DB::transaction(function () use ($sheet, $sheetDetailsList) {
-            $sheet->save();
-            $sheet->sheet_details()->createMany($sheetDetailsList);
-        });
 
-        return response()->redirectToRoute('sheet::index')->with('status', __('List imported succesfully!'));
+        if ($this->errors) {
+            return back()->withErrors($this->errors)->with('status', implode('<br>', $this->success));
+        }
+
+        return response()->redirectToRoute('sheet::index')->with('status', implode('<br>', $this->success));
+    }
+
+    private function _importOne($tmp_file_name)
+    {
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmp_file_name);
+            $active_sheet = $spreadsheet->getActiveSheet()->toArray();
+
+            $sheet = new Sheet();
+            $sheetDetailsList = [];
+
+            $is_header = true;
+            $line_no = 1;
+            if (count($active_sheet[0]) != 12) {
+                return __('List format error!');
+            }
+            foreach ($active_sheet as $sheet_row) {
+                if ($is_header) {
+                    foreach ($sheet_row as $sheet_col) {
+                        if (Str::of($sheet_col)->startsWith('Маршрутный лист № ')) {
+                            // Маршрутный лист № Э0000078623 от 22 июня 2021 г.
+                            $line = (string)Str::of($sheet_col)->replaceFirst('Маршрутный лист № ', '');
+                            $result = $this->parseNomerData($line);
+                            $sheet->nomer = $result['nomer'];
+                            $sheet->data = $result['data'];
+                            continue;
+                        }
+                        if (Str::of($sheet_col)->startsWith('Маршрут №: ')) {
+                            $sheet->name = (string)Str::of($sheet_col)->replaceFirst('Маршрут №: ', '');
+                            continue;
+                        }
+                        if ($sheet_col == '№') {
+                            $is_header = false;
+                        }
+                    }
+                } else {
+                    // header is complete
+                    if (is_null($sheet_row[0])) {
+                        continue;
+                    }
+
+                    // fill line
+                    if ($sheet_row[0] == $line_no++) {
+                        $sheetDetailsList[] = [
+                            'npp' => $sheet_row[0],
+                            'contragent' => $sheet_row[1],
+                            'playground' => $sheet_row[3],
+                            //                        'overflow' => $sheet_row[4],
+                            //                        'note' => $sheet_row[5],
+                            //                        'volume' => $sheet_row[6],
+                            //                        'count_plan' => $sheet_row[7],
+                            //                        'count_units' => $sheet_row[8],
+                            //                        'count_fact' => $sheet_row[9],
+                            //                        'count_general' => $sheet_row[10],
+                            //                        'mark' => $sheet_row[10],
+                        ];
+                    }
+                }
+            }
+            $db_result = DB::transaction(function () use ($sheet, $sheetDetailsList) {
+                $sheet->save();
+                $sheet->sheet_details()->createMany($sheetDetailsList);
+                return true;
+            });
+            return $db_result;
+        } catch (\Exception $exception) {
+            return $exception->getMessage();
+        }
     }
 
     private function parseNomerData($line)

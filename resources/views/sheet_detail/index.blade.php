@@ -5,8 +5,15 @@
         <div class="row justify-content-center">
             <div class="col">
                 <div class="card">
-                    <div class="card-header">{{ __('Sheet details') }} <strong>&laquo;{{ $sheet->name }}&raquo;</strong><br>
-                        № <strong>{{ $sheet->nomer }}</strong> от <strong>{{ $sheet->data }}</strong></div>
+                    <div class="card-header d-flex">
+                        <div class="flex-grow-1">
+                            {{ __('Sheet details') }} <strong>&laquo;{{ $sheet->name }}&raquo;</strong><br>
+                            № <strong>{{ $sheet->nomer }}</strong> от <strong>{{ $sheet->data }}</strong>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary" onclick="history.go(-1);">{{ __('Back') }}</button>
+                        </div>
+                    </div>
                     <div class="card-body">
                         @if (session('status'))
                             <div class="alert alert-success" role="alert">

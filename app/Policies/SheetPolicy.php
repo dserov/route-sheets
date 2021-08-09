@@ -30,7 +30,7 @@ class SheetPolicy
      */
     public function view(User $user, Sheet $sheet)
     {
-        return $user->id == $sheet->user_id || $user->is_admin;
+        return $user->id == $sheet->user_id || $user->is_admin || $user->is_logistic;
     }
 
     /**

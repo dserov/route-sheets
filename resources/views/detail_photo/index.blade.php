@@ -41,6 +41,7 @@
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-success">{{ __('Upload') }}</button>
+                                <button type="button" class="btn btn-outline-secondary ml-4" onclick="history.go(-1);">{{ __('Cancel') }}</button>
                             </div>
                         </form>
 
