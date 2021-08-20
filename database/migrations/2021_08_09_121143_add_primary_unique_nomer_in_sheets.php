@@ -14,7 +14,7 @@ class AddPrimaryUniqueNomerInSheets extends Migration
     public function up()
     {
         Schema::table('sheets', function (Blueprint $table) {
-            $table->unique('nomer');
+            $table->unique('nomer', 'sheets_nomer_unique');
         });
     }
 
@@ -26,7 +26,7 @@ class AddPrimaryUniqueNomerInSheets extends Migration
     public function down()
     {
         Schema::table('sheets', function (Blueprint $table) {
-            $table->dropUnique('nomer');
+            $table->dropUnique('sheets_nomer_unique');
         });
     }
 }
