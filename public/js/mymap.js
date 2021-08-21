@@ -16,7 +16,9 @@ var canvasOptions = {
     opacity: 0.7
 };
 
-ymaps.ready(['Map', 'Polygon', 'Placemark']).then(function () {
+ymaps.ready(init);
+
+function init() {
     var map = new ymaps.Map('map', {
         center: [55.0378599938, 73.4201805827],
         zoom: 15
@@ -59,12 +61,19 @@ ymaps.ready(['Map', 'Polygon', 'Placemark']).then(function () {
                 polygon = new ymaps.Polygon([coordinates], {}, polygonOptions);
                 map.geoObjects.add(polygon);
 
+
                 drawButton.disabled = false;
-            });
+            }).then(function () {
+
+            // покажем только те объекты, что в выбранной области
+            storage.setOptions('visible', false);
+            var objectsInsidePolygon = storage.searchInside(polygon);
+            objectsInsidePolygon.setOptions('visible', true);
+        });
     };
 
     // add all geoObjects to map
-    var allObjects = [];
+    let allObjects = [];
 
     geo_list.forEach(function (item) {
         allObjects.push(
@@ -72,16 +81,16 @@ ymaps.ready(['Map', 'Polygon', 'Placemark']).then(function () {
                 {
                     geometry: item.geometry,
                     properties: {
-                        balloonContent: item.name
+                        hintContent: item.name
                     }
                 }
             )
         );
     });
 
-    var storage = ymaps.geoQuery(allObjects).addToMap(map);
-    // var result = ymaps.geoQuery(allObjects).applyBoundsToMap(map);
-});
+    var storage = ymaps.geoQuery(allObjects).setOptions('visible', false).addToMap(map);
+//    var result = ymaps.geoQuery(allObjects).applyBoundsToMap(map);
+}
 
 function drawLineOverMap(map) {
     var canvas = document.querySelector('#draw-canvas');

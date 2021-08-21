@@ -40,7 +40,9 @@ class GeoPoint extends Model
         if (is_array($pointList[0])) {
             return [
                 'type' => 'Polygon',
-                'coordinates' => $pointList,
+                'coordinates' => [
+                    $pointList
+                ],
             ];
         }
         return [
