@@ -1,7 +1,3 @@
-window.addEventListener('load', function () {
-    console.log('dom load');
-});
-
 var polygonOptions = {
     strokeColor: '#0000ff',
     fillColor: '#8080ff',
@@ -26,6 +22,7 @@ function init() {
     var polygon = null;
 
     var drawButton = document.querySelector('#draw');
+    var downloadButton = document.querySelector('#download');
 
     drawButton.onclick = function () {
         drawButton.disabled = true;
@@ -67,7 +64,7 @@ function init() {
 
             // покажем только те объекты, что в выбранной области
             storage.setOptions('visible', false);
-            var objectsInsidePolygon = storage.searchInside(polygon);
+            window.objectsInsidePolygon = storage.searchInside(polygon);
             objectsInsidePolygon.setOptions('visible', true);
         });
     };
@@ -81,7 +78,8 @@ function init() {
                 {
                     geometry: item.geometry,
                     properties: {
-                        hintContent: item.name
+                        hintContent: item.name,
+                        baloonContent: item.description,
                     }
                 }
             )
@@ -89,7 +87,72 @@ function init() {
     });
 
     var storage = ymaps.geoQuery(allObjects).setOptions('visible', false).addToMap(map);
-//    var result = ymaps.geoQuery(allObjects).applyBoundsToMap(map);
+
+    downloadButton.onclick = makeCsvAndDownload;
+}
+
+function makeCsvAndDownload() {
+    const rows = [];
+
+    if (typeof objectsInsidePolygon == "undefined" || objectsInsidePolygon.getLength() == 0) {
+        alert('Нечего выгружать');
+        return;
+    }
+
+    objectsInsidePolygon.each(function (a, b) {
+        let prop = a.properties._data;
+        let row = [
+            b + 1,
+            prop.hintContent,
+            prop.baloonContent
+        ];
+        rows.push(row);
+    });
+
+    exportToCsv('export.csv', rows);
+}
+
+function exportToCsv(filename, rows) {
+    var processRow = function (row) {
+        var finalVal = '';
+        for (var j = 0; j < row.length; j++) {
+            var innerValue = row[j] === null ? '' : row[j].toString();
+            if (row[j] instanceof Date) {
+                innerValue = row[j].toLocaleString();
+            }
+            var result = innerValue.replace(/"/g, '""');
+            if (result.search(/("|,|\n)/g) >= 0)
+                result = '"' + result + '"';
+            if (j > 0)
+                finalVal += ';';
+            finalVal += result;
+        }
+        return finalVal + '\n';
+    };
+
+    var universalBOM = "\uFEFF";
+
+    var csvFile = universalBOM;
+    for (var i = 0; i < rows.length; i++) {
+        csvFile += processRow(rows[i]);
+    }
+
+    var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+    if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, filename);
+    } else {
+        var link = document.createElement("a");
+        if (link.download !== undefined) { // feature detection
+            // Browsers that support HTML5 download attribute
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
 }
 
 function drawLineOverMap(map) {
@@ -149,21 +212,3 @@ function drawLineOverMap(map) {
         };
     });
 }
-
-// Метод IPolygonGeometryAccess
-// var myPolygon = new ymaps.geometry.Polygon([
-//     [
-//         [57.14, 65.55],
-//         [68, 55],
-//         [86, 56]
-//     ]
-// ]);
-//
-// Метод работает только с корректно заданной картой.
-// myPolygon.options.setParent(myMap.options);
-// myPolygon.geometry.setMap(myMap);
-
-// Проверка, входит ли точка клика в полигон, с заданной выше геометрией.
-// myMap.events.add('click', function (e) {
-//     alert(myPolygon.geometry.contains(e.get('#draw-canvas')) ? 'Успешно' : 'Еще раз');
-// });
