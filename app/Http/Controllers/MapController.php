@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGeoListRequest;
 use App\Models\GeoPoint;
-use Illuminate\Http\Request;
 
 class MapController extends Controller
 {
     public function index()
     {
+        $this->authorize('create', GeoPoint::class);
         $geoRows = (new GeoPoint)->getAsJson();
 
         return \View::make('map.index', [
@@ -19,7 +19,7 @@ class MapController extends Controller
 
     public function showImportForm()
     {
-//        $this->authorize('create', Sheet::class);
+        $this->authorize('create', GeoPoint::class);
         return \View::make('map.import');
     }
 
@@ -62,7 +62,7 @@ class MapController extends Controller
 
     public function import(StoreGeoListRequest $request)
     {
-//        $this->authorize('create', Sheet::class);
+        $this->authorize('create', GeoPoint::class);
         if (false == $request->hasFile('geo_list')) {
             return back()->withErrors(['Geo lists not founded']);
         }

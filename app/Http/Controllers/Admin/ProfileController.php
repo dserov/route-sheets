@@ -57,6 +57,7 @@ class ProfileController extends Controller
             $data['is_admin'] = $request->has('is_admin');
             $data['is_driver'] = $request->has('is_driver');
             $data['is_logistic'] = $request->has('is_logistic');
+            $data['is_map'] = $request->has('is_map');
         }
 
         if ($request->hasFile('avatar')) {

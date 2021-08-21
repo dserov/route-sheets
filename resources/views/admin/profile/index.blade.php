@@ -80,6 +80,14 @@
                                                 <span class="">{{ __('No') }}</span>
                                             @endif
                                         </div>
+                                        <div>
+                                            <span class="font-weight-bold">{{ __('Mapper') }}: </span>
+                                            @if($user->is_map)
+                                                <span class="">{{__('Yes')}}</span>
+                                            @else
+                                                <span class="">{{ __('No') }}</span>
+                                            @endif
+                                        </div>
                                     </div>
                                     <div class="p-2 d-flex flex-column">
                                         <a href="{{route('admin::profile::update', ['user' => $user])}}"

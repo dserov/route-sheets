@@ -52,6 +52,7 @@ class SaveUserRequest extends FormRequest
             'is_admin' => __('User is admin'),
             'is_driver' => __('User is driver'),
             'is_logistic' => __('User is logistic'),
+            'is_map' => __('User is mapper'),
             'phone' => __('Phone'),
         ];
     }

@@ -42,11 +42,13 @@
                             {{ __('Sheets') }}
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('map::index') }}" class="nav-link">
-                            {{ __('Map') }}
-                        </a>
-                    </li>
+                    @can('create', \App\Model\GeoPoint::class)
+                        <li class="nav-item">
+                            <a href="{{ route('map::index') }}" class="nav-link">
+                                {{ __('Map') }}
+                            </a>
+                        </li>
+                    @endcan
                 </ul>
 
                 <!-- Right Side Of Navbar -->
@@ -73,6 +75,7 @@
                                 @if(Auth::user()->is_admin)A @endif
                                 @if(Auth::user()->is_logistic)L @endif
                                 @if(Auth::user()->is_driver)D @endif
+                                @if(Auth::user()->is_map)M @endif
                                 )
                             </a>
 

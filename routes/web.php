@@ -43,7 +43,7 @@ Route::group([
 Route::group([
     'prefix' => 'map',
     'as' => 'map::',
-//    'middleware' => ['auth'],
+    'middleware' => ['auth'],
 ], function (){
     Route::get('/', [App\Http\Controllers\MapController::class, 'index'])->name('index');
     Route::get('/kml', [\App\Http\Controllers\MapController::class, 'showImportForm'])->name('import_form');

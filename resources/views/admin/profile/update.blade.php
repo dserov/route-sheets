@@ -109,6 +109,17 @@
                                 <div class="alert alert-danger">{{$message}}</div>
                                 @enderror
                             </div>
+                            <div class="form-group row">
+                                <div class="col-md-6 offset-md-6">
+                                    <div class="form-check">
+                                        {!! Form::checkbox('is_map', 1, old('is_map'), ['id' => 'is_map', 'class' => 'form-check-input']) !!}
+                                        {!! Form::label('is_map', __('Mapper'), ['class' => 'form-check-label']) !!}
+                                    </div>
+                                </div>
+                                @error('is_admin')
+                                <div class="alert alert-danger">{{$message}}</div>
+                                @enderror
+                            </div>
                         @endcan
 
                         <div class="form-group row">

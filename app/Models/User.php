@@ -36,6 +36,7 @@ use Illuminate\Notifications\Notifiable;
  * @property bool $is_admin
  * @property bool $is_driver
  * @property bool $is_logistic
+ * @property bool $is_map
  * @property string|null $avatar
  * @property string|null $phone
  * @method static \Illuminate\Database\Eloquent\Builder|User whereAvatar($value)
@@ -60,6 +61,7 @@ class User extends Authenticatable
         'is_admin',
         'is_driver',
         'is_logistic',
+        'is_map',
         'created_at',
         'avatar',
         'phone',
@@ -85,5 +87,6 @@ class User extends Authenticatable
         'is_admin' => 'boolean',
         'is_driver' => 'boolean',
         'is_logistic' => 'boolean',
+        'is_map' => 'boolean',
     ];
 }
