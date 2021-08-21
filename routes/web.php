@@ -40,6 +40,15 @@ Route::group([
     Route::get('/{sheet}/sheet_detail', [App\Http\Controllers\SheetDetailController::class, 'show'])->name('sheet_detail');
 });
 
+Route::group([
+    'prefix' => 'map',
+    'as' => 'map::',
+//    'middleware' => ['auth'],
+], function (){
+    Route::get('/', [App\Http\Controllers\MapController::class, 'index'])->name('index');
+    Route::get('/kml', [\App\Http\Controllers\MapController::class, 'showImportForm'])->name('import_form');
+    Route::post('/kml', [App\Http\Controllers\MapController::class, 'import'])->name('import_save');
+});
 
 Route::group([
     'prefix' => 'sheetdetail',

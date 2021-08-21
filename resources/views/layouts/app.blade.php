@@ -42,6 +42,11 @@
                             {{ __('Sheets') }}
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('map::index') }}" class="nav-link">
+                            {{ __('Map') }}
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Right Side Of Navbar -->
@@ -97,5 +102,6 @@
         @yield('content')
     </main>
 </div>
+@yield('scripts')
 </body>
 </html>
