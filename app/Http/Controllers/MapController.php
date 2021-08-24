@@ -4,9 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGeoListRequest;
 use App\Models\GeoPoint;
+use App\Models\Ut;
+use PharIo\Manifest\ElementCollectionException;
 
 class MapController extends Controller
 {
+    const PREFIX = 'УТ';
+
+    private $_errors = [];
+
     public function index()
     {
         $this->authorize('create', GeoPoint::class);
@@ -34,7 +40,8 @@ class MapController extends Controller
         }
 
         $string = ((string)\Str::of((string)$nodes[0])->trim());
-        return preg_replace('/[\x00-\x1F]/', '', $string);
+        $string = preg_replace('/[\x00-\x1F]/', '', $string);
+        return (string) \Str::of($string)->trim();
     }
 
     /**
@@ -63,20 +70,117 @@ class MapController extends Controller
     public function import(StoreGeoListRequest $request)
     {
         $this->authorize('create', GeoPoint::class);
-        if (false == $request->hasFile('geo_list')) {
-            return back()->withErrors(['Geo lists not founded']);
+
+        try {
+            // парсинг и загрузка kml-файла.
+            $dataGeopoint = [];
+            if ($request->hasFile('geo_list')) {
+                $file = $request->file('geo_list');
+                $fileName = $file->getPathname();
+                $dataGeopoint = $this->_parseGeopointKml($fileName);
+                $this->_insertIntoTableGeoPoint($dataGeopoint);
+            } else {
+                $dataGeopoint = GeoPoint::all()->toArray();
+            }
+
+            if (empty($dataGeopoint)) {
+                throw new \Exception('Сначала необходимо загрузить kml-файл');
+            }
+
+            // convert $dataGeopoint
+            $dataGeopointDictionary = $this->_convertDataGeopointToDictionary($dataGeopoint);
+
+            if ($request->hasFile('ut_list')) {
+                $file = $request->file('ut_list');
+                $fileName = $file->getPathname();
+                $dataUtList = $this->_parseUtXls($fileName, $dataGeopointDictionary);
+                $this->_insertIntoTableUts($dataUtList);
+            }
+
+            return response()->redirectToRoute('map::index')->with('status', __('Files was loaded succesfully'));
+        } catch (\Exception $exception) {
+            $this->_errors[] = $exception->getMessage();
+            return back()->withErrors($this->_errors);
+        } catch (\Throwable $exception) {
+            $this->_errors[] = $exception->getMessage();
+            return back()->withErrors($this->_errors);
         }
+    }
 
-        $file = $request->file('geo_list');
-
-        // $file->getPathname()
-        $fileName = $file->getPathname(); //"D:\Downloads\Geofences (1).kml";
-
+    /**
+     * @param array $dataGeopoint
+     * @return array
+     */
+    private function _convertDataGeopointToDictionary($dataGeopoint) {
         $data = [];
+        foreach ($dataGeopoint as $item) {
+            $result = \Str::of($item['description'])->matchAll('/(\d{7})/');
+            foreach ($result as $part) {
+                $key = self::PREFIX . $part;
+                $data[$key][] = $item['id'];
+            }
+        }
+        return $data;
+    }
 
-        $xml = simplexml_load_file($fileName);
+    /**
+     * @param $dataGeopoint
+     * @throws \Throwable
+     */
+    private function _insertIntoTableGeoPoint($dataGeopoint)
+    {
+        // insert data
+        $chunks = array_chunk($dataGeopoint, 500);
+        $dbResult = \DB::transaction(function () use ($chunks) {
+            \DB::table('geo_points')->delete();
+
+            $isNotErrorInsert = true;
+            foreach ($chunks as $chunk) {
+                $isNotErrorInsert = $isNotErrorInsert && GeoPoint::insert($chunk);
+            }
+
+            return $isNotErrorInsert;
+        });
+        if ($dbResult === false) {
+            throw new \Exception('Error inserting data into table geo_points.');
+        }
+    }
+
+    /**
+     * @param $dataUtList
+     * @throws \Throwable
+     */
+    private function _insertIntoTableUts($dataUtList)
+    {
+        // insert data
+        $chunks = array_chunk($dataUtList, 500);
+        $dbResult = \DB::transaction(function () use ($chunks) {
+            \DB::table('uts')->delete();
+
+            $isNotErrorInsert = true;
+            foreach ($chunks as $chunk) {
+                $isNotErrorInsert = $isNotErrorInsert && Ut::insert($chunk);
+            }
+
+            return $isNotErrorInsert;
+        });
+        if ($dbResult === false) {
+            throw new \Exception('Error inserting data into table uts.');
+        }
+    }
+
+    /**
+     * @param $fullFileName
+     * @return array
+     * @throws \Exception
+     */
+    private function _parseGeopointKml($fullFileName)
+    {
+        $data = [];
+        $xml = simplexml_load_file($fullFileName);
         $placemarks = $xml->xpath('Document/Placemark');
         $invalidEntry = [];
+        $id = 1;
         foreach ($placemarks as $placemark) {
             $name = $this->getSingleValue($placemark->xpath('name'));
             $description = $this->getSingleValue($placemark->xpath('description'));
@@ -87,30 +191,96 @@ class MapController extends Controller
                 $invalidEntry[] = 'Entry is invalid' . $name;
                 continue;
             }
-            $data[] = [
-                'name' => $name,
-                'description' => $description,
-                'point' => serialize(array_merge($point, $polygon)),
-            ];
+
+            // строки без номера договора игнорируем
+            if (\Str::contains($description, self::PREFIX)) {
+                $data[] = [
+                    'id' => $id++,
+                    'name' => $name,
+                    'description' => $description,
+                    'point' => serialize(array_merge($point, $polygon)),
+                ];
+            }
         }
 
         if (!empty($invalidEntry)) {
-            return back()->withErrors($invalidEntry);
+            $this->_errors[] = $invalidEntry;
         }
 
-        $chunks = array_chunk($data, 500);
-        $isNotErrorInsert = true;
-        \DB::transaction(function () use ($chunks, &$isNotErrorInsert) {
-            \DB::table('geo_points')->delete();
+        if (empty($data)) {
+            throw new \Exception('Данные из kml-файла не удалось загрузить');
+        }
 
-            foreach ($chunks as $chunk) {
-                $isNotErrorInsert = $isNotErrorInsert && GeoPoint::insert($chunk);
+        return $data;
+    }
+
+    /**
+     * @param string $fullFileName
+     * @param array $dataGeopointDictionary
+     * @return array|null|string
+     */
+    private function _parseUtXls($fullFileName, $dataGeopointDictionary)
+    {
+        try {
+            $utList = [];
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fullFileName);
+            $workSheet = $spreadsheet->setActiveSheetIndexByName('жилье+юр.лица');
+
+            $active_sheet = $workSheet->toArray();
+
+            if (count($active_sheet[0]) < 8) {
+                throw new \Exception(__('List format error!'));
             }
-        });
-        if (!$isNotErrorInsert) {
-            return back()->withErrors('Error inserting data into table.');
-        }
 
-        return response()->redirectToRoute('map::index')->with('status', __('File was loaded succesfully'));
+            $is_header = true;
+            foreach ($active_sheet as $sheet_row) {
+                if ($is_header) {
+                    // skip header
+                    if ($sheet_row[0] == 'N') {
+                        $is_header = false;
+                    }
+                    continue;
+                } else {
+                    // fill line
+                    $ut_number = (string) \Str::of($sheet_row[4])->trim();
+                    if (!array_key_exists($ut_number, $dataGeopointDictionary)) {
+                        $this->_errors[] = 'Договор ' . $ut_number . ' не найден в kml-файле';
+                        continue;
+                    }
+                    $geo_point_list = $dataGeopointDictionary[$ut_number];
+                    foreach ($geo_point_list as $geo_point_id) {
+                            $utList[] = [
+                                'geo_point_id' => $geo_point_id,
+                                'playground' => (string)\Str::of($sheet_row[1])->trim(),
+                                'container_type' => (string)\Str::of($sheet_row[2])->trim(),
+                                'container_volume' => (string)\Str::of($sheet_row[3])->trim(),
+                                'ut_number' => $ut_number,
+                                'export_schedule' => (string)\Str::of($sheet_row[5])->trim(),
+                                'export_days' => (string)\Str::of($sheet_row[6])->trim(),
+                                'export_volume' => (string)\Str::of($sheet_row[7])->trim(),
+                        ];
+                    }
+                }
+            }
+            return $utList;
+        } catch (\Exception $exception) {
+            $this->_errors[] = $exception->getMessage();
+            return [];
+        }
+    }
+
+    /**
+     * @param $ut_number
+     * @param $dataGeopoint
+     *
+     * @return array
+     */
+    private function _findGeoPointId($ut_number, $dataGeopoint)
+    {
+        $filteredGeoPoint = array_filter($dataGeopoint, function ($item) use ($ut_number) {
+            return \Str::contains($item['description'], $ut_number);
+        });
+
+        return \Arr::pluck($filteredGeoPoint, 'id');
     }
 }

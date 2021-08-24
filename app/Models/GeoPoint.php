@@ -10,10 +10,16 @@ class GeoPoint extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'name',
         'description',
         'point',
     ];
+
+    public function uts()
+    {
+        return $this->hasMany(Ut::class);
+    }
 
     public function getAsJson()
     {
@@ -21,6 +27,7 @@ class GeoPoint extends Model
         $data = [];
         foreach ($points as $point) {
             $data[] = [
+                'id' => $point->id,
                 'name' => $point->name,
                 'description' => $point->description,
                 'geometry' => $this->_makeGeoObject($point->point),

@@ -46,8 +46,8 @@ Route::group([
     'middleware' => ['auth'],
 ], function (){
     Route::get('/', [App\Http\Controllers\MapController::class, 'index'])->name('index');
-    Route::get('/kml', [\App\Http\Controllers\MapController::class, 'showImportForm'])->name('import_form');
-    Route::post('/kml', [App\Http\Controllers\MapController::class, 'import'])->name('import_save');
+    Route::get('/import', [\App\Http\Controllers\MapController::class, 'showImportForm'])->name('import_form');
+    Route::post('/import', [App\Http\Controllers\MapController::class, 'import'])->name('import_save');
 });
 
 Route::group([
