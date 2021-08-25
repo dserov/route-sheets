@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGeoListRequest;
 use App\Models\GeoPoint;
 use App\Models\Ut;
-use PharIo\Manifest\ElementCollectionException;
+use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class MapController extends Controller
 {
@@ -41,7 +43,7 @@ class MapController extends Controller
 
         $string = ((string)\Str::of((string)$nodes[0])->trim());
         $string = preg_replace('/[\x00-\x1F]/', '', $string);
-        return (string) \Str::of($string)->trim();
+        return (string)\Str::of($string)->trim();
     }
 
     /**
@@ -111,7 +113,8 @@ class MapController extends Controller
      * @param array $dataGeopoint
      * @return array
      */
-    private function _convertDataGeopointToDictionary($dataGeopoint) {
+    private function _convertDataGeopointToDictionary($dataGeopoint)
+    {
         $data = [];
         foreach ($dataGeopoint as $item) {
             $result = \Str::of($item['description'])->matchAll('/(\d{7})/');
@@ -242,22 +245,22 @@ class MapController extends Controller
                     continue;
                 } else {
                     // fill line
-                    $ut_number = (string) \Str::of($sheet_row[4])->trim();
+                    $ut_number = (string)\Str::of($sheet_row[4])->trim();
                     if (!array_key_exists($ut_number, $dataGeopointDictionary)) {
                         $this->_errors[] = 'Договор ' . $ut_number . ' не найден в kml-файле';
                         continue;
                     }
                     $geo_point_list = $dataGeopointDictionary[$ut_number];
                     foreach ($geo_point_list as $geo_point_id) {
-                            $utList[] = [
-                                'geo_point_id' => $geo_point_id,
-                                'playground' => (string)\Str::of($sheet_row[1])->trim(),
-                                'container_type' => (string)\Str::of($sheet_row[2])->trim(),
-                                'container_volume' => (string)\Str::of($sheet_row[3])->trim(),
-                                'ut_number' => $ut_number,
-                                'export_schedule' => (string)\Str::of($sheet_row[5])->trim(),
-                                'export_days' => (string)\Str::of($sheet_row[6])->trim(),
-                                'export_volume' => (string)\Str::of($sheet_row[7])->trim(),
+                        $utList[] = [
+                            'geo_point_id' => $geo_point_id,
+                            'playground' => (string)\Str::of($sheet_row[1])->trim(),
+                            'container_type' => (string)\Str::of($sheet_row[2])->trim(),
+                            'container_volume' => (string)\Str::of($sheet_row[3])->trim(),
+                            'ut_number' => $ut_number,
+                            'export_schedule' => (string)\Str::of($sheet_row[5])->trim(),
+                            'export_days' => (string)\Str::of($sheet_row[6])->trim(),
+                            'export_volume' => (string)\Str::of($sheet_row[7])->trim(),
                         ];
                     }
                 }
@@ -282,5 +285,43 @@ class MapController extends Controller
         });
 
         return \Arr::pluck($filteredGeoPoint, 'id');
+    }
+
+    public function export(Request $request)
+    {
+        $id_list = explode(',', $request->input('id_list'));
+        $rows = Ut::query()->whereIn('geo_point_id', $id_list)->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $row_num = 1;
+        // make header
+        $sheet->setCellValueByColumnAndRow(1, $row_num, 'N');
+        $sheet->setCellValueByColumnAndRow(2, $row_num, 'Площадка');
+        $sheet->setCellValueByColumnAndRow(3, $row_num, 'Тип контейнера');
+        $sheet->setCellValueByColumnAndRow(4, $row_num, 'м3');
+        $sheet->setCellValueByColumnAndRow(5, $row_num, 'Код');
+        $sheet->setCellValueByColumnAndRow(6, $row_num, 'График вывоза');
+        $sheet->setCellValueByColumnAndRow(7, $row_num, 'Кол-во дней вывоза');
+        $sheet->setCellValueByColumnAndRow(8, $row_num, 'Вывозимое кол-во');
+
+        $row_num++;
+        foreach ($rows as $row) {
+            $sheet->setCellValueByColumnAndRow(1, $row_num, $row_num - 1);
+            $sheet->setCellValueByColumnAndRow(2, $row_num, $row->playground);
+            $sheet->setCellValueByColumnAndRow(3, $row_num, $row->container_type);
+            $sheet->setCellValueByColumnAndRow(4, $row_num, $row->container_volume);
+            $sheet->setCellValueByColumnAndRow(5, $row_num, $row->ut_number);
+            $sheet->setCellValueByColumnAndRow(6, $row_num, $row->export_schedule);
+            $sheet->setCellValueByColumnAndRow(7, $row_num, $row->export_days);
+            $sheet->setCellValueByColumnAndRow(8, $row_num, $row->export_volume);
+            $row_num++;
+        }
+
+        $basePath = \Storage::disk('public')->path('');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($basePath . 'export.xlsx');
+
+        return response()->download($basePath . 'export.xlsx');
     }
 }

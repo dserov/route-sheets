@@ -48,6 +48,7 @@ Route::group([
     Route::get('/', [App\Http\Controllers\MapController::class, 'index'])->name('index');
     Route::get('/import', [\App\Http\Controllers\MapController::class, 'showImportForm'])->name('import_form');
     Route::post('/import', [App\Http\Controllers\MapController::class, 'import'])->name('import_save');
+    Route::post('/export', [App\Http\Controllers\MapController::class, 'export'])->name('export_geopoints');
 });
 
 Route::group([

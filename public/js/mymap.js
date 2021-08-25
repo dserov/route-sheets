@@ -80,6 +80,7 @@ function init() {
                     properties: {
                         hintContent: item.name,
                         baloonContent: item.description,
+                        geoPointId: item.id
                     }
                 }
             )
@@ -101,15 +102,15 @@ function makeCsvAndDownload() {
 
     objectsInsidePolygon.each(function (a, b) {
         let prop = a.properties._data;
-        let row = [
-            b + 1,
-            prop.hintContent,
-            prop.baloonContent
-        ];
-        rows.push(row);
+        rows.push(prop.geoPointId);
     });
 
-    exportToCsv('export.csv', rows);
+//    exportToCsv('export.csv', rows);
+//     $token = $('[name="csrf-token"]').attr('content');
+    $('#id_list').val(rows.join(','));
+    $('#export_geopoints').submit();
+    // data = {
+    // };
 }
 
 function exportToCsv(filename, rows) {

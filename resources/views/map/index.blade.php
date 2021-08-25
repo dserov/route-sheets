@@ -19,6 +19,10 @@
             </div>
         </div>
     </div>
+    <form action="{{route('map::export_geopoints')}}" id="export_geopoints" method="post">
+        @csrf
+        <input type="hidden" name="id_list" id="id_list" value="">
+    </form>
 @endsection
 
 @section('scripts')
