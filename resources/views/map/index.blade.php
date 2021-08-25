@@ -11,7 +11,7 @@
                 @endif
                 <a href="{{route('map::import_form')}}" class="btn btn-outline-primary">Импорт</a>
                 <button id="draw" class="btn btn-success">Выделить область</button>
-                <button id="download" class="btn btn-secondary">Скачать export.csv</button>
+                <button id="download" class="btn btn-secondary">Скачать export.xlsx</button>
                 <div id="container" style="position: relative;">
                     <div id="map" style="width: 800px; height: 600px;"></div>
                     <canvas id="draw-canvas" style="position: absolute; left: 0; top: 0; display: none;"></canvas>

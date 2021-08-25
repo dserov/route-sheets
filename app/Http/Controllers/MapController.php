@@ -251,6 +251,9 @@ class MapController extends Controller
                         continue;
                     }
                     $geo_point_list = $dataGeopointDictionary[$ut_number];
+                    $export_days = (string) \Str::of($sheet_row[6])->trim();
+                    $export_days = (int) filter_var($export_days, FILTER_SANITIZE_NUMBER_INT);
+                    $export_days = min($export_days, 365);
                     foreach ($geo_point_list as $geo_point_id) {
                         $utList[] = [
                             'geo_point_id' => $geo_point_id,
@@ -259,7 +262,7 @@ class MapController extends Controller
                             'container_volume' => (string)\Str::of($sheet_row[3])->trim(),
                             'ut_number' => $ut_number,
                             'export_schedule' => (string)\Str::of($sheet_row[5])->trim(),
-                            'export_days' => (string)\Str::of($sheet_row[6])->trim(),
+                            'export_days' => $export_days,
                             'export_volume' => (string)\Str::of($sheet_row[7])->trim(),
                         ];
                     }
