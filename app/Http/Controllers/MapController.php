@@ -321,6 +321,24 @@ class MapController extends Controller
             $row_num++;
         }
 
+        // check not found records
+        $geo_points = GeoPoint::select('geo_points.*')
+            ->leftJoin('uts', 'geo_points.id', '=', 'uts.geo_point_id')
+            ->whereNull('uts.geo_point_id')
+            ->whereIn('geo_points.id', $id_list)->get();
+        if ($geo_points->count() > 0) {
+            $row_num += 2;
+            $sheet->setCellValueByColumnAndRow(1, $row_num++, "Есть мнение, что информации, загруженной из xls-файла" .
+                " недостаточно. Выбрано строчек меньше, чем передано гео-точек.");
+            $i = 1;
+            foreach ($geo_points as $geo_point) {
+                $sheet->setCellValueByColumnAndRow(1, $row_num, $i++);
+                $sheet->setCellValueByColumnAndRow(2, $row_num, $geo_point->name);
+                $sheet->setCellValueByColumnAndRow(5, $row_num, $geo_point->description);
+                $row_num++;
+            }
+        }
+
         $basePath = \Storage::disk('public')->path('');
         $writer = new Xlsx($spreadsheet);
         $writer->save($basePath . 'export.xlsx');

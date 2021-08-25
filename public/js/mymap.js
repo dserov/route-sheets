@@ -12,20 +12,66 @@ var canvasOptions = {
     opacity: 0.7
 };
 
+var map = null;
+var isMapFullScreen = false;
+
 ymaps.ready(init);
 
 function init() {
-    var map = new ymaps.Map('map', {
+    map = new ymaps.Map('map', {
         center: [55.0378599938, 73.4201805827],
         zoom: 15
     });
-    var polygon = null;
+    let polygon = null;
+    let objectsInsidePolygon = null;
 
-    var drawButton = document.querySelector('#draw');
-    var downloadButton = document.querySelector('#download');
+    // add all geoObjects to map
+    let allObjects = [];
+    geo_list.forEach(function (item) {
+        allObjects.push(
+            new ymaps.GeoObject(
+                {
+                    geometry: item.geometry,
+                    properties: {
+                        hintContent: item.name,
+                        baloonContent: item.description,
+                        geoPointId: item.id
+                    }
+                }
+            )
+        );
+    });
 
-    drawButton.onclick = function () {
-        drawButton.disabled = true;
+    const storage = ymaps.geoQuery(allObjects).setOptions('visible', false).addToMap(map);
+
+    let downloadButton =
+        new ymaps.control.Button({
+            data: {
+                content: '<b>Скачать</b>',
+                title: 'Скачать export.xlsx'
+            }
+        });
+    downloadButton.events.add('press', downloadButtonHandler);
+    map.controls.add(downloadButton, {
+        float: "left"
+    });
+    let drawButton =
+        new ymaps.control.Button({
+            data: {
+                content: '<b>Выбрать</b>',
+                title: 'Выбрать область'
+            }
+        });
+    drawButton.events.add('press', drawButtonHandler);
+    map.controls.add(drawButton, {
+        float: "left"
+    });
+
+    map.controls.get('fullscreenControl').events.add('fullscreenenter', fullscreenControlEnterHandler);
+    map.controls.get('fullscreenControl').events.add('fullscreenexit', fullscreenControlExitHandler);
+
+    function drawButtonHandler() {
+        drawButton.disable();
 
         // Удаляем старый полигон.
         if (polygon) {
@@ -58,101 +104,45 @@ function init() {
                 polygon = new ymaps.Polygon([coordinates], {}, polygonOptions);
                 map.geoObjects.add(polygon);
 
-
-                drawButton.disabled = false;
+                drawButton.enable();
             }).then(function () {
 
             // покажем только те объекты, что в выбранной области
             storage.setOptions('visible', false);
-            window.objectsInsidePolygon = storage.searchInside(polygon);
+            objectsInsidePolygon = storage.searchInside(polygon);
             objectsInsidePolygon.setOptions('visible', true);
         });
-    };
-
-    // add all geoObjects to map
-    let allObjects = [];
-
-    geo_list.forEach(function (item) {
-        allObjects.push(
-            new ymaps.GeoObject(
-                {
-                    geometry: item.geometry,
-                    properties: {
-                        hintContent: item.name,
-                        baloonContent: item.description,
-                        geoPointId: item.id
-                    }
-                }
-            )
-        );
-    });
-
-    var storage = ymaps.geoQuery(allObjects).setOptions('visible', false).addToMap(map);
-
-    downloadButton.onclick = makeCsvAndDownload;
-}
-
-function makeCsvAndDownload() {
-    const rows = [];
-
-    if (typeof objectsInsidePolygon == "undefined" || objectsInsidePolygon.getLength() == 0) {
-        alert('Нечего выгружать');
-        return;
     }
 
-    objectsInsidePolygon.each(function (a, b) {
-        let prop = a.properties._data;
-        rows.push(prop.geoPointId);
-    });
+    function downloadButtonHandler() {
+        const rows = [];
 
-//    exportToCsv('export.csv', rows);
-//     $token = $('[name="csrf-token"]').attr('content');
-    $('#id_list').val(rows.join(','));
-    $('#export_geopoints').submit();
-    // data = {
-    // };
-}
-
-function exportToCsv(filename, rows) {
-    var processRow = function (row) {
-        var finalVal = '';
-        for (var j = 0; j < row.length; j++) {
-            var innerValue = row[j] === null ? '' : row[j].toString();
-            if (row[j] instanceof Date) {
-                innerValue = row[j].toLocaleString();
-            }
-            var result = innerValue.replace(/"/g, '""');
-            if (result.search(/("|,|\n)/g) >= 0)
-                result = '"' + result + '"';
-            if (j > 0)
-                finalVal += ';';
-            finalVal += result;
+        if (typeof objectsInsidePolygon == "undefined" || objectsInsidePolygon.getLength() == 0) {
+            alert('Нечего выгружать');
+            return;
         }
-        return finalVal + '\n';
-    };
 
-    var universalBOM = "\uFEFF";
+        objectsInsidePolygon.each(function (a, b) {
+            let prop = a.properties._data;
+            rows.push(prop.geoPointId);
+        });
 
-    var csvFile = universalBOM;
-    for (var i = 0; i < rows.length; i++) {
-        csvFile += processRow(rows[i]);
+        $('#id_list').val(rows.join(','));
+        $('#export_geopoints').submit();
     }
 
-    var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
-    if (navigator.msSaveBlob) { // IE 10+
-        navigator.msSaveBlob(blob, filename);
-    } else {
-        var link = document.createElement("a");
-        if (link.download !== undefined) { // feature detection
-            // Browsers that support HTML5 download attribute
-            var url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+    function fullscreenControlEnterHandler(event) {
+        isMapFullScreen = true;
+        let canvas = $('#draw-canvas').detach();
+        $('body').append(canvas);
+        canvas.css({"z-index": 11000});
+    }
+
+    function fullscreenControlExitHandler(event) {
+        isMapFullScreen = false;
+        let canvas = $('#draw-canvas').detach();
+        $('#container').append(canvas);
+        canvas.css({"z-index": "auto"});
     }
 }
 
@@ -164,6 +154,9 @@ function drawLineOverMap(map) {
 
     // Задаем размеры канвасу как у карты.
     var rect = map.container.getParentElement().getBoundingClientRect();
+    if (isMapFullScreen) {
+        rect = document.querySelector('body > ymaps').getBoundingClientRect();
+    }
     canvas.style.width = rect.width + 'px';
     canvas.style.height = rect.height + 'px';
     canvas.width = rect.width;

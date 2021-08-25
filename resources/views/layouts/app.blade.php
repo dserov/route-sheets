@@ -43,11 +43,17 @@
                         </a>
                     </li>
                     @can('create', \App\Model\GeoPoint::class)
-                        <li class="nav-item">
-                            <a href="{{ route('map::index') }}" class="nav-link">
+                        <div class="btn-group">
+                            <a href="{{ route('map::index') }}" class="btn btn-outline-primary">
                                 {{ __('Map') }}
                             </a>
-                        </li>
+                            <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="{{route('map::import_form')}}" class="dropdown-item">Импорт</a>
+                            </div>
+                        </div>
                     @endcan
                 </ul>
 
