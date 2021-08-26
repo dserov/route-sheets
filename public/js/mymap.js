@@ -78,6 +78,7 @@ function init() {
     function drawButtonHandler() {
         downloadButton.disable();
         drawButton.data.set('content', '<b> Стоп </b>');
+        drawButton.data.set('title', 'Отобразить выбранные объекты');
 
         // Удаляем старый полигон.
         if (polygon) {
@@ -155,6 +156,7 @@ function init() {
 
         downloadButton.enable();
         drawButton.data.set('content', '<b>Выбрать</b>');
+        drawButton.data.set('title', 'Выбрать область');
     }
 }
 
