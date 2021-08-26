@@ -58,20 +58,6 @@ function init() {
     map.controls.add(downloadButton, {
         float: "left"
     });
-    let stopEditingButton =
-        new ymaps.control.Button({
-            data: {
-                content: '<b>Поиск</b>',
-                title: 'Поиск объектов в области'
-            },
-            state: {
-                enabled: false
-            }
-        });
-    stopEditingButton.events.add('press', stopEditingButtonHandler);
-    map.controls.add(stopEditingButton, {
-        float: "left"
-    });
 
     let drawButton =
         new ymaps.control.Button({
@@ -80,7 +66,8 @@ function init() {
                 title: 'Выбрать область'
             }
         });
-    drawButton.events.add('press', drawButtonHandler);
+    drawButton.events.add('select', drawButtonHandler);
+    drawButton.events.add('deselect', stopEditingButtonHandler);
     map.controls.add(drawButton, {
         float: "left"
     });
@@ -89,8 +76,8 @@ function init() {
     map.controls.get('fullscreenControl').events.add('fullscreenexit', fullscreenControlExitHandler);
 
     function drawButtonHandler() {
-        drawButton.disable();
         downloadButton.disable();
+        drawButton.data.set('content', '<b> Стоп </b>');
 
         // Удаляем старый полигон.
         if (polygon) {
@@ -124,7 +111,6 @@ function init() {
                 map.geoObjects.add(polygon);
             }).then(function () {
                 polygon.editor.startEditing();
-                stopEditingButton.enable();
         });
     }
 
@@ -162,15 +148,13 @@ function init() {
     function stopEditingButtonHandler(event) {
         polygon.editor.stopEditing();
 
-        stopEditingButton.disable();
-
         // покажем только те объекты, что в выбранной области
         storage.setOptions('visible', false);
         objectsInsidePolygon = storage.searchInside(polygon);
         objectsInsidePolygon.setOptions('visible', true);
 
         downloadButton.enable();
-        drawButton.enable();
+        drawButton.data.set('content', '<b>Выбрать</b>');
     }
 }
 
