@@ -49,12 +49,30 @@ function init() {
             data: {
                 content: '<b>Скачать</b>',
                 title: 'Скачать export.xlsx'
+            },
+            state: {
+                enabled: false
             }
         });
     downloadButton.events.add('press', downloadButtonHandler);
     map.controls.add(downloadButton, {
         float: "left"
     });
+    let stopEditingButton =
+        new ymaps.control.Button({
+            data: {
+                content: '<b>Поиск</b>',
+                title: 'Поиск объектов в области'
+            },
+            state: {
+                enabled: false
+            }
+        });
+    stopEditingButton.events.add('press', stopEditingButtonHandler);
+    map.controls.add(stopEditingButton, {
+        float: "left"
+    });
+
     let drawButton =
         new ymaps.control.Button({
             data: {
@@ -72,6 +90,7 @@ function init() {
 
     function drawButtonHandler() {
         drawButton.disable();
+        downloadButton.disable();
 
         // Удаляем старый полигон.
         if (polygon) {
@@ -103,14 +122,9 @@ function init() {
                 // Создаем новый полигон
                 polygon = new ymaps.Polygon([coordinates], {}, polygonOptions);
                 map.geoObjects.add(polygon);
-
-                drawButton.enable();
             }).then(function () {
-
-            // покажем только те объекты, что в выбранной области
-            storage.setOptions('visible', false);
-            objectsInsidePolygon = storage.searchInside(polygon);
-            objectsInsidePolygon.setOptions('visible', true);
+                polygon.editor.startEditing();
+                stopEditingButton.enable();
         });
     }
 
@@ -143,6 +157,20 @@ function init() {
         let canvas = $('#draw-canvas').detach();
         $('#container').append(canvas);
         canvas.css({"z-index": "auto"});
+    }
+
+    function stopEditingButtonHandler(event) {
+        polygon.editor.stopEditing();
+
+        stopEditingButton.disable();
+
+        // покажем только те объекты, что в выбранной области
+        storage.setOptions('visible', false);
+        objectsInsidePolygon = storage.searchInside(polygon);
+        objectsInsidePolygon.setOptions('visible', true);
+
+        downloadButton.enable();
+        drawButton.enable();
     }
 }
 
