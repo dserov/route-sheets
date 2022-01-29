@@ -25,6 +25,7 @@
                         <div class="gallery">
                             @foreach($photos as $photo)
                                 <div class="gallery__ramka">
+                                    <div class="gallery__delete" data-image-id="{{ $photo->id }}"></div>
                                     <a href="{{ $photo->path }}" data-fancybox="gallery">
                                         <img src="{{ $photo->thumb }}" class="gallery__img img-thumbnail"
                                              alt="{{ $photo->description }}">
@@ -41,7 +42,8 @@
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-success">{{ __('Upload') }}</button>
-                                <button type="button" class="btn btn-outline-secondary ml-4" onclick="history.go(-1);">{{ __('Cancel') }}</button>
+                                <button type="button" class="btn btn-outline-secondary ml-4"
+                                        onclick="window.location.href='{{ route('sheet::sheet_detail', [ 'sheet' => $sheet_detail->sheet_id ]) }}'">{{ __('Cancel') }}</button>
                             </div>
                         </form>
 
@@ -59,12 +61,36 @@
         </div>
     </div>
     <script>
-        // onchange="showImageHereFunc();" id="uploadImageFile"
-        function showImageHereFunc() {
-            let total_file = document.getElementById("uploadImageFile").files.length;
-            for (let i = 0; i < total_file; i++) {
-                $('#showImageHere').append("<div class='card col-md-4'><img class='card-img-top' src='" + URL.createObjectURL(event.target.files[i]) + "'></div>");
-            }
+      window.addEventListener('load', function () {
+        const url = '{{ route('sheet_detail::detail_photo::upload_photos', [ 'sheetDetail' => $sheet_detail ]) }}/';
+        console.log(url);
+
+        $(document).on('click', '.gallery__delete', function () {
+          let imageId = $(this).data('imageId');
+          let self = this;
+
+          axios.post(url + imageId, {_method: 'delete'})
+            .then((response) => {
+              if (response.data.error == 'false') {
+                // foto deleted
+                $(self).closest('.gallery__ramka').remove();
+                return;
+              }
+              alert(response.data.message);
+            }, (error) => {
+              //     error callback
+              console.log(error);
+            });
+        });
+
+      });
+
+      // onchange="showImageHereFunc();" id="uploadImageFile"
+      function showImageHereFunc() {
+        let total_file = document.getElementById("uploadImageFile").files.length;
+        for (let i = 0; i < total_file; i++) {
+          $('#showImageHere').append("<div class='card col-md-4'><img class='card-img-top' src='" + URL.createObjectURL(event.target.files[i]) + "'></div>");
         }
+      }
     </script>
 @endsection

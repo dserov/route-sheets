@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\DetailPhotoRequest;
 use App\Models\DetailFoto;
 use App\Models\SheetDetail;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
+use Intervention\Image\Exception\NotFoundException;
 use Intervention\Image\Facades\Image;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class DetailPhotoController extends Controller
 {
@@ -21,6 +24,40 @@ class DetailPhotoController extends Controller
             'sheet_detail' => $sheetDetail,
             'photos' => $photos,
         ]);
+    }
+
+    public function delete($sheetDetail, $detailFoto) {
+      header('Content-type: application/json');
+      $response =array(
+        'message' => 'Что-то пошло не по плану.',
+        'error' => 'true',
+      );
+      try {
+        $foto = DetailFoto::find($detailFoto);
+        if ($foto === null) throw new NotFoundHttpException('Foto not found');
+        $this->authorize('delete', $foto);
+
+        $basePath = \Storage::disk('public')->path('');
+        $filePath = $basePath . self::IMAGE_DIR . DIRECTORY_SEPARATOR . $foto->name;
+        $thumbPath = $basePath . self::THUMB_DIR . DIRECTORY_SEPARATOR . $foto->name;
+        try {
+          \File::delete($filePath);
+        } catch (\Exception $e) {}
+        try {
+          \File::delete($thumbPath);
+        } catch (\Exception $e) {}
+        try {
+          $foto->delete();
+        } catch (\Exception $e) {}
+        $response['error'] = 'false';
+        $response['message'] = 'Фотография удалена';
+      } catch (NotFoundHttpException $notFoundException) {
+        $response['message'] = 'Фотография не найдена';
+      } catch (AuthorizationException $authorizationException) {
+        $response['message'] = 'У вас нет прав делать это';
+      } catch (\Exception $exception) {
+      }
+      return json_encode($response);
     }
 
     public function store(DetailPhotoRequest $request, SheetDetail $sheetDetail)

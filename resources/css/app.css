@@ -9,6 +9,19 @@
     width: 150px;
     height: 150px;
     cursor: pointer;
+    position: relative;
+}
+
+.gallery__delete {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border-radius: 0.25rem;
+    background-image:url("/img/delete.svg");
+    background-color: #ff0000;
+    border: 3px solid red;
 }
 
 .gallery__img {
