@@ -25,7 +25,7 @@
                         <div class="gallery">
                             @foreach($photos as $photo)
                                 <div class="gallery__ramka">
-                                    <div class="gallery__delete" data-image-id="{{ $photo->id }}"></div>
+                                    <a class="gallery__delete" data-image-id="{{ $photo->id }}" href="#"></a>
                                     <a href="{{ $photo->path }}" data-fancybox="gallery">
                                         <img src="{{ $photo->thumb }}" class="gallery__img img-thumbnail"
                                              alt="{{ $photo->description }}">
@@ -65,7 +65,9 @@
         const url = '{{ route('sheet_detail::detail_photo::upload_photos', [ 'sheetDetail' => $sheet_detail ]) }}/';
         console.log(url);
 
-        $(document).on('click', '.gallery__delete', function () {
+        $(document).on('click', '.gallery__delete', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
           let imageId = $(this).data('imageId');
           let self = this;
 
