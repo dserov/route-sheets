@@ -5,8 +5,14 @@
         <div class="row justify-content-center">
             <div class="col">
                 <div class="card">
-                    <div class="card-header">{{ __('Playground photos') }}
-                        <strong>{{ $sheet_detail->playground }}</strong>
+                    <div class="card-header d-flex">{{ __('Playground photos') }}
+                        <div class="flex-grow-1">
+                            <strong>{{ $sheet_detail->playground }}</strong>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary"
+                                    onclick="window.location.href='{{ route('sheet::sheet_detail', [ 'sheet' => $sheet_detail->sheet_id ]) }}'">{{ __('Back') }}</button>
+                        </div>
                     </div>
                     <div>
                         @if (session('status'))
@@ -42,8 +48,6 @@
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-success">{{ __('Upload') }}</button>
-                                <button type="button" class="btn btn-outline-secondary ml-4"
-                                        onclick="window.location.href='{{ route('sheet::sheet_detail', [ 'sheet' => $sheet_detail->sheet_id ]) }}'">{{ __('Cancel') }}</button>
                             </div>
                         </form>
 

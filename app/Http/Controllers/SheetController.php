@@ -23,6 +23,8 @@ class SheetController extends Controller
             $sheets = Sheet::orderByDesc('data')->where('user_id', \Auth::id())->paginate(30);
         }
 
+        $request->session()->put('sheet_page', $request->get('page'));
+
         return view('sheet.index', [
             'sheets' => $sheets,
         ]);

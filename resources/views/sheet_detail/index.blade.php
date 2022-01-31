@@ -5,7 +5,7 @@
         <div class="row justify-content-center">
             <div class="col">
                 <div class="card">
-                    <div class="card-header d-flex">
+                    <div class="card-header d-flex flex-column">
                         <div class="flex-grow-1">
                             {{ __('Sheet details') }} <strong>&laquo;{{ $sheet->name }}&raquo;</strong><br>
                             № <strong>{{ $sheet->nomer }}</strong> от <strong>{{ $sheet->data }}</strong>
@@ -14,7 +14,7 @@
                         </div>
                         <div class="d-flex flex-column align-items-end">
                             <div>
-                                <button type="button" class="btn btn-outline-secondary" onclick="history.go(-1);">{{ __('Back') }}</button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='{{ route('sheet::index', [ 'page' => Session::get('sheet_page') ]) }}'">{{ __('Back') }}</button>
                             </div>
                             <form class="form-inline my-2">
                                 <input class="form-control" type="search" placeholder="Search" aria-label="Search"
@@ -33,10 +33,10 @@
                         @endif
                         <div class="container-fluid">
                             <div class="row border-bottom border-top my-2 py-2">
-                                <div class="col-1 font-weight-bold"><label><input type="radio" name="sorting" value="0" class="d-none"> №</label></div>
-                                <div class="col-5 col-sm-4 font-weight-bold"><label><input type="radio" name="sorting" value="1" class="d-none"> Контрагент</label></div>
-                                <div class="col-5 col-sm-4 font-weight-bold"><label><input type="radio" name="sorting" value="2" class="d-none"> Площадка</label></div>
-                                <div class="col col-sm-3 font-weight-bold">&nbsp;</div>
+                                <div class="col-sm-1 font-weight-bold"><label><input type="radio" name="sorting" value="0" class="d-none"> №</label></div>
+                                <div class="col-sm-4 font-weight-bold"><label><input type="radio" name="sorting" value="1" class="d-none"> Контрагент</label></div>
+                                <div class="col-sm-4 font-weight-bold"><label><input type="radio" name="sorting" value="2" class="d-none"> Площадка</label></div>
+                                <div class="col font-weight-bold">&nbsp;</div>
                             </div>
                             <div id="sheet_detail">
                                 @include('sheet_detail')
