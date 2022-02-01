@@ -5,8 +5,8 @@
         <div class="row justify-content-center">
             <div class="col">
                 <div class="card">
-                    <div class="card-header d-flex flex-column">
-                        <div class="flex-grow-1">
+                    <div class="card-header d-flex flex-column flex-sm-row">
+                        <div class="flex-grow-1 text-center text-sm-left">
                             {{ __('Sheet details') }} <strong>&laquo;{{ $sheet->name }}&raquo;</strong><br>
                             № <strong>{{ $sheet->nomer }}</strong> от <strong>{{ $sheet->data }}</strong>
                             <br>
@@ -16,7 +16,7 @@
                             <div>
                                 <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='{{ route('sheet::index', [ 'page' => Session::get('sheet_page') ]) }}'">{{ __('Back') }}</button>
                             </div>
-                            <form class="form-inline my-2">
+                            <form class="form-inline my-2 w-100">
                                 <input class="form-control" type="search" placeholder="Search" aria-label="Search"
                                        id="search_input">
                                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit" style="display: none">
@@ -33,9 +33,9 @@
                         @endif
                         <div class="container-fluid">
                             <div class="row border-bottom border-top my-2 py-2">
-                                <div class="col-sm-1 font-weight-bold"><label><input type="radio" name="sorting" value="0" class="d-none"> №</label></div>
-                                <div class="col-sm-4 font-weight-bold"><label><input type="radio" name="sorting" value="1" class="d-none"> Контрагент</label></div>
-                                <div class="col-sm-4 font-weight-bold"><label><input type="radio" name="sorting" value="2" class="d-none"> Площадка</label></div>
+                                <div class="col-sm-2 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="0" class="sorting_input"> №</label></div>
+                                <div class="col-sm-4 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="1" class="sorting_input"> Контрагент</label></div>
+                                <div class="col-sm-4 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="2" class="sorting_input"> Площадка</label></div>
                                 <div class="col font-weight-bold">&nbsp;</div>
                             </div>
                             <div id="sheet_detail">
