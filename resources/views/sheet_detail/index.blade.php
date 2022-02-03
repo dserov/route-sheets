@@ -36,7 +36,7 @@
                                 <div class="col-sm-2 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="0" class="sorting_input"> №</label></div>
                                 <div class="col-sm-4 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="1" class="sorting_input"> Контрагент</label></div>
                                 <div class="col-sm-4 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="2" class="sorting_input"> Площадка</label></div>
-                                <div class="col font-weight-bold">&nbsp;</div>
+                                <div class="col font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="3" class="sorting_input"> Фото</label></div>
                             </div>
                             <div id="sheet_detail">
                                 @include('sheet_detail')
@@ -49,7 +49,6 @@
     </div>
     <script>
       window.addEventListener('load', function () {
-
         let handleSearch = function () {
           let value = $(this).val();
           value = value.trim().toLowerCase();
@@ -63,8 +62,6 @@
             }
           });
         };
-
-
         $('#search_input').on('keyup', _.debounce(handleSearch, 500));
         $('#search_input').on('search', _.debounce(handleSearch, 500));
 
@@ -99,12 +96,52 @@
             $('#sheet_detail').append(row);
           });
         };
-
         // сортировка
         $('input[name="sorting"]').on('change', function (e) {
           let fieldNum = this.value;
-          sortTableHandler(fieldNum);
+
+          Cookies.set('sheet_detail_sorting', fieldNum, {
+            expires : 30,
+            path : '/',
+            domain : ''
+          });
+
+          if (fieldNum === '3') {
+            window.location.reload();
+          } else {
+            sortTableHandler(fieldNum);
+          }
         });
+
+        $(document).on('click', '.foto-npp', function(event) {
+          let npp = $(this).data('npp');
+          Cookies.set('sheet_detail_npp', npp, {
+            expires : 30,
+            path : '/',
+            domain : ''
+          });
+        });
+
+        // установка сортировки и положения страницы по кукам
+        let sheet_detail_sorting = Cookies.get('sheet_detail_sorting');
+        let sheet_detail_npp = Cookies.get('sheet_detail_npp');
+
+        if (sheet_detail_sorting !== undefined) {
+          if (sheet_detail_sorting < 3) {
+            try {$('input[name="sorting"][value=' + sheet_detail_sorting + ']').prop('checked', 'checked').change();} catch (e) {}
+            console.log('sheet_detail_sorting = ' + sheet_detail_sorting);
+          }
+        }
+
+        if (sheet_detail_npp !== undefined) {
+          try {
+            setTimeout(function () {
+                document.querySelector('a[name="npp' + sheet_detail_npp + '"]').scrollIntoView();
+            }, 500);
+          } catch (e) {}
+          console.log('sheet_detail_npp = ' + sheet_detail_npp);
+        }
+
       });
     </script>
 @endsection

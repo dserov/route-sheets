@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use \App\Http\Controllers\Admin\ExportController as AdminExportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -74,6 +75,15 @@ Route::group([
     Route::get('/update/{user}', [AdminProfileController::class, 'update'])->name('update');
     Route::get('/delete/{user}', [AdminProfileController::class, 'destroy'])->name('delete');
     Route::post('/save', [AdminProfileController::class, 'save'])->name('save');
+});
+
+Route::group([
+    'prefix' => 'admin/export',
+    'as' => 'admin::export::',
+    'middleware' => ['auth'],
+], function () {
+    Route::get('/', [AdminExportController::class, 'index'])->name('index');
+    Route::post('/export', [AdminExportController::class, 'export'])->name('export');
 });
 
 Route::get('/storage/{file}', function ($fileName) {
