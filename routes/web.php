@@ -83,7 +83,7 @@ Route::group([
     'middleware' => ['auth'],
 ], function () {
     Route::get('/', [AdminExportController::class, 'index'])->name('index');
-    Route::post('/export', [AdminExportController::class, 'export'])->name('export');
+    Route::post('/', [AdminExportController::class, 'export'])->name('export');
 });
 
 Route::get('/storage/{file}', function ($fileName) {

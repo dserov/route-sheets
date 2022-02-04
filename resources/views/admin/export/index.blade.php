@@ -25,10 +25,83 @@
                                 </ul>
                             </div>
                         @endif
-                        CONTENT
+                            <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                <i class="fa fa-calendar"></i>&nbsp;
+                                <span></span> <i class="fa fa-caret-down"></i>
+                            </div>
+                            <form action="{{route('admin::export::export')}}" method="post">
+                                @csrf
+                                <input type="hidden" name="from_date" value="" required>
+                                <input type="hidden" name="to_date" value="" required>
+                                <button class="btn btn-primary mt-4" type="submit">Скачать архив</button>
+                            </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+      window.addEventListener('load', function() {
+        $(function() {
+
+          var start = moment().subtract(29, 'days');
+          var end = moment();
+
+          function cb(start, end) {
+            $('#reportrange span').html(start.format('DD MMMM YYYY') + ' - ' + end.format('DD MMMM YYYY'));
+
+            $('input[name="from_date"]').val(start.format('DD/MM/YYYY'));
+            $('input[name="to_date"]').val(end.format('DD/MM/YYYY'));
+          }
+
+          $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+              'Сегодня': [moment(), moment()],
+              'Вчера': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+              'Последние 7 дней': [moment().subtract(6, 'days'), moment()],
+              'Последние 30 дней': [moment().subtract(29, 'days'), moment()],
+              'Этот месяц': [moment().startOf('month'), moment().endOf('month')],
+              'Прошлый месяц': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            "locale": {
+              "format": "DD/MM/YYYY",
+              "separator": " - ",
+              "applyLabel": "Выбрать",
+              "cancelLabel": "Отмена",
+              "fromLabel": "От",
+              "toLabel": "До",
+              "customRangeLabel": "Произвольный",
+              "weekLabel": "W",
+              "daysOfWeek": [
+                "Вс",
+                "Пн",
+                "Вт",
+                "Ср",
+                "Чт",
+                "Пт",
+                "Сб"
+              ],
+              "monthNames": [
+                "Январь",
+                "Февраль",
+                "Март",
+                "Апрель",
+                "Май",
+                "Июнь",
+                "Июль",
+                "Август",
+                "Сентябрь",
+                "Октябрь",
+                "Ноябрь",
+                "Декабрь"
+              ],
+              "firstDay": 1
+            },
+          }, cb);
+          cb(start, end);
+        });
+      });
+    </script>
 @endsection
