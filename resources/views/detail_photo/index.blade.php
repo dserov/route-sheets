@@ -31,11 +31,12 @@
                         <div class="gallery">
                             @foreach($photos as $photo)
                                 <div class="gallery__ramka">
-                                    <a class="gallery__delete" data-image-id="{{ $photo->id }}" href="#"></a>
-                                    <a href="{{ $photo->path }}" data-fancybox="gallery">
+                                    <a class="gallery__link" href="{{ $photo->path }}" data-fancybox="gallery">
                                         <img src="{{ $photo->thumb }}" class="gallery__img img-thumbnail"
                                              alt="{{ $photo->description }}">
                                     </a>
+                                    <div class="gallery__sign">{{ \Carbon\Carbon::parse($photo->created_at)->locale('ru')->format('d.m.Y H:i:s') }}</div>
+                                    <a class="gallery__delete" data-image-id="{{ $photo->id }}" href="#"></a>
                                 </div>
                             @endforeach
                         </div>
@@ -72,6 +73,10 @@
         $(document).on('click', '.gallery__delete', function (e) {
           e.preventDefault();
           e.stopPropagation();
+          if (!confirm('Удалить фото?')) {
+            return;
+          }
+
           let imageId = $(this).data('imageId');
           let self = this;
 

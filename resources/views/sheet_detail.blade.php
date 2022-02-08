@@ -1,9 +1,9 @@
 @forelse($sheet_details as $sheet_detail)
     <div class="row border-bottom my-2 py-2">
         <a name="npp{{ $sheet_detail->npp }}"></a>
-        <div class="col-sm-1 text-nowrap">{{ $sheet_detail->npp }}</div>
-        <div class="col-sm-4">{{ $sheet_detail->contragent }}</div>
-        <div class="col-sm-4">{{ $sheet_detail->playground }}</div>
+        <div class="col-2 col-sm-1 text-nowrap"><strong>{{ $sheet_detail->npp }}</strong></div>
+        <div class="col-10 col-sm-4">{{ $sheet_detail->contragent }}</div>
+        <div class="col-12 col-sm-4"><strong>{{ $sheet_detail->playground }}</strong></div>
         <div class="col">
             <a href="{{ route('sheet_detail::detail_photo::list_by_sheet_detail', [ 'sheetDetail' => $sheet_detail ]) }}"
                     class="btn btn-info position-relative foto-npp" data-npp="{{ $sheet_detail->npp }}">Фотографии

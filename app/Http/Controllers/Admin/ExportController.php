@@ -28,7 +28,8 @@ class ExportController extends Controller
       $dateTo = \DateTime::createFromFormat('d/m/Y', $request->input('to_date'));
 
       $rows = Sheet::whereBetween('data', [$dateFrom->format('Y/m/d'), $dateTo->format('Y/m/d')])
-        ->with(['sheet_details', 'sheet_details.detail_fotos'])->get();
+        ->whereNotNull('user_id')
+        ->with(['user', 'sheet_details', 'sheet_details.detail_fotos'])->get();
 
       $basePath = \Storage::disk('public')->path('');
       $exportPath = $basePath . 'export';
@@ -46,15 +47,19 @@ class ExportController extends Controller
       chdir($exportPath);
 
       foreach ($rows as $row) {
+        $driverName = $this->validateFilename($row->user->name);
+        if (!strlen($driverName)) {
+          continue;
+        }
+
         foreach ($row->sheet_details as $sheet_detail) {
-          $contragentName = $this->validateFilename($sheet_detail->contragent);
           $playgroundName = $this->validateFilename($sheet_detail->playground);
 
           // copy fotos
           foreach ($sheet_detail->detail_fotos as $detail_foto) {
             $fileFullName = $basePath . DetailPhotoController::IMAGE_DIR . DIRECTORY_SEPARATOR . $detail_foto->name;
             if (\File::exists($fileFullName)) {
-              $fotoPath = $exportPath . DIRECTORY_SEPARATOR . $row->data . DIRECTORY_SEPARATOR . $contragentName . DIRECTORY_SEPARATOR . $playgroundName . DIRECTORY_SEPARATOR;
+              $fotoPath = $exportPath . DIRECTORY_SEPARATOR . $row->data . DIRECTORY_SEPARATOR . $driverName . DIRECTORY_SEPARATOR . $playgroundName . DIRECTORY_SEPARATOR;
               \File::ensureDirectoryExists($fotoPath);
               \File::copy($fileFullName, $fotoPath . $detail_foto->name);
               usleep(1000);
@@ -103,35 +108,4 @@ class ExportController extends Controller
     return str_replace($invalidCharacters, '_', $filename);
   }
 
-  // Function to recursively add a directory,
-  // sub-directories and files to a zip archive
-  /**
-   * @param $dir
-   * @param \ZipArchive $zipArchive
-   * @param string $zipdir
-   */
-  private function addFolderToZip($dir, $zipArchive, $zipdir = ''){
-    dump('$dir = ' . $dir);
-    if (is_dir($dir)) {
-      if ($dh = opendir($dir)) {
-        //Add the directory
-        if(!empty($zipdir)) $zipArchive->addEmptyDir($zipdir);
-
-        // Loop through all the files
-        while (($file = readdir($dh)) !== false) {
-
-          //If it's a folder, run the function again!
-          if(!is_file($dir . $file)){
-            // Skip parent and root directories
-            if( ($file !== ".") && ($file !== "..")){
-              $this->addFolderToZip($dir . $file . DIRECTORY_SEPARATOR, $zipArchive, $zipdir . $file . DIRECTORY_SEPARATOR);
-            }
-          }else{
-            // Add the files
-            $zipArchive->addFile($dir . $file, $zipdir . $file);
-          }
-        }
-      }
-    }
-  }
 }

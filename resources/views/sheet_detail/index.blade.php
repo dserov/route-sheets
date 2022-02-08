@@ -33,9 +33,9 @@
                         @endif
                         <div class="container-fluid">
                             <div class="row border-bottom border-top my-2 py-2">
-                                <div class="col-sm-2 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="0" class="sorting_input"> №</label></div>
-                                <div class="col-sm-4 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="1" class="sorting_input"> Контрагент</label></div>
-                                <div class="col-sm-4 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="2" class="sorting_input"> Площадка</label></div>
+                                <div class="col-4 col-sm-2 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="0" class="sorting_input"> №</label></div>
+                                <div class="col-8 col-sm-4 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="1" class="sorting_input"> Контрагент</label></div>
+                                <div class="col-12 col-sm-4 font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="2" class="sorting_input"> Площадка</label></div>
                                 <div class="col font-weight-bold"><label class="btn btn-outline-secondary sorting_label"><input type="radio" name="sorting" value="3" class="sorting_input"> Фото</label></div>
                             </div>
                             <div id="sheet_detail">

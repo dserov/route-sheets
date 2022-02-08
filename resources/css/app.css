@@ -7,9 +7,21 @@
 .gallery__ramka {
     margin: 5px;
     width: 150px;
-    height: 150px;
     cursor: pointer;
     position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery__link {
+    display: block;
+    height: 150px;
+}
+
+.gallery__sign {
+    font-size: smaller;
+    font-weight: bold;
+    text-align: center;
 }
 
 .gallery__delete {
