@@ -61,6 +61,7 @@ Route::group([
     Route::get('/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'listBySheetDetailId'])->name('detail_photo::list_by_sheet_detail');
     Route::post('/{sheetDetail}/detail_photo', [App\Http\Controllers\DetailPhotoController::class, 'store'])->name('detail_photo::upload_photos');
     Route::delete('/{sheetDetail}/detail_photo/{detailFoto}', [App\Http\Controllers\DetailPhotoController::class, 'delete'])->name('detail_photo::delete_photo');
+    Route::post('/{sheetDetail}/detail_photo/{detailFoto}', [App\Http\Controllers\DetailPhotoController::class, 'rotate'])->name('detail_photo::rotate_photo');
 });
 
 Route::group([

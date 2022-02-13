@@ -60,6 +60,31 @@ class DetailPhotoController extends Controller
       return json_encode($response);
     }
 
+    public function rotate($sheetDetail, $detailFoto) {
+      header('Content-type: application/json');
+      $response =array(
+        'message' => 'Что-то пошло не по плану.',
+      );
+      try {
+        $foto = DetailFoto::find($detailFoto);
+        if ($foto === null) throw new NotFoundHttpException('Foto not found');
+        $this->authorize('delete', $foto);
+
+        $rotate = $foto->rotate + 1;
+        $rotate = ($rotate > 3 ? 0 : $rotate);
+
+        $foto->rotate = $rotate;
+        $foto->save();
+
+        $response['rotate'] = $rotate;
+        $response['message'] = '';
+      } catch (NotFoundHttpException $notFoundHttpException) {
+        $response['message'] = $notFoundHttpException->getMessage();
+      } catch (\Exception $exception) {}
+
+      return json_encode($response);
+    }
+
     public function store(DetailPhotoRequest $request, SheetDetail $sheetDetail)
     {
         if ($request->hasfile('images')) {

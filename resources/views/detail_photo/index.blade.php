@@ -31,12 +31,17 @@
                         <div class="gallery">
                             @foreach($photos as $photo)
                                 <div class="gallery__ramka">
-                                    <a class="gallery__link" href="{{ $photo->path }}" data-fancybox="gallery">
+                                    <a class="gallery__link" href="{{ $photo->path }}"
+                                       data-caption="{{ \Carbon\Carbon::parse($photo->created_at)->locale('ru')->format('d.m.Y H:i:s') }}"
+                                       data-fancybox="gallery" style="transform: rotate({{ $photo->rotate * 90 }}deg)"
+                                       data-rotate="{{ $photo->rotate }}"
+                                    >
                                         <img src="{{ $photo->thumb }}" class="gallery__img img-thumbnail"
                                              alt="{{ $photo->description }}">
                                     </a>
                                     <div class="gallery__sign">{{ \Carbon\Carbon::parse($photo->created_at)->locale('ru')->format('d.m.Y H:i:s') }}</div>
                                     <a class="gallery__delete" data-image-id="{{ $photo->id }}" href="#"></a>
+                                    <a class="gallery__rotate" data-image-id="{{ $photo->id }}" href="#"></a>
                                 </div>
                             @endforeach
                         </div>
@@ -67,9 +72,6 @@
     </div>
     <script>
       window.addEventListener('load', function () {
-        const url = '{{ route('sheet_detail::detail_photo::upload_photos', [ 'sheetDetail' => $sheet_detail ]) }}/';
-        console.log(url);
-
         $(document).on('click', '.gallery__delete', function (e) {
           e.preventDefault();
           e.stopPropagation();
@@ -77,10 +79,11 @@
             return;
           }
 
-          let imageId = $(this).data('imageId');
+          let detailFoto = $(this).data('imageId');
           let self = this;
 
-          axios.post(url + imageId, {_method: 'delete'})
+          const url = '{{ route('sheet_detail::detail_photo::upload_photos', [ 'sheetDetail' => $sheet_detail ]) }}/' + detailFoto;
+          axios.post(url, {_method: 'delete'})
             .then((response) => {
               if (response.data.error == 'false') {
                 // foto deleted
@@ -94,14 +97,53 @@
             });
         });
 
+        $(document).on('click', '.gallery__rotate', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          let detailFoto = $(this).data('imageId');
+          let rotate = 1 * $(this).data('imageRotate');
+          let self = this;
+
+          const url = '{{ route('sheet_detail::detail_photo::upload_photos', [ 'sheetDetail' => $sheet_detail ]) }}/' + detailFoto;
+          axios.post(url, {rotate: rotate})
+            .then((response) => {
+              if (response.data.message) {
+                alert(response.data.message);
+                return;
+              }
+              // foto rotate
+              self.parentElement.querySelector('.gallery__link').style.transform = 'rotate(' + (response.data.rotate * 90) + 'deg)';
+              self.parentElement.querySelector('.gallery__link').dataset['rotate'] = parseInt(response.data.rotate);
+              console.log('rotate = ' + response.data.rotate);
+            }, (error) => {
+              //     error callback
+              console.log(error);
+            });
+        });
+
+        Fancybox.bind('[data-fancybox]', {
+          caption: function (fancybox, carousel, slide) {
+            return (
+              `${slide.index + 1} / ${carousel.slides.length} <br />` + slide.caption
+            );
+          },
+          groupAll: true, // Group all items
+          on: {
+            // "*": (event, fancybox, slide) => {
+            // },
+            done: (fancybox, slide) => {
+              slide.$content.style.transform = `rotate(${slide.$trigger.dataset['rotate'] * 90}deg)`;
+              if(button = slide.$content.querySelector('button.carousel__button.is-close')) {
+                button.remove();
+              }
+            },
+          },
+          // Carousel: {
+          //
+          // },
+        });
       });
 
-      // onchange="showImageHereFunc();" id="uploadImageFile"
-      function showImageHereFunc() {
-        let total_file = document.getElementById("uploadImageFile").files.length;
-        for (let i = 0; i < total_file; i++) {
-          $('#showImageHere').append("<div class='card col-md-4'><img class='card-img-top' src='" + URL.createObjectURL(event.target.files[i]) + "'></div>");
-        }
-      }
     </script>
 @endsection

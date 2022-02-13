@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $sheet_detail_id код строки маршрутного листа
  * @property string $name имя файла
  * @property string $path относительный путь
+ * @property int $rotate поворот картинки
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto newModelQuery()
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto wherePath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto whereRotate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto whereSheetDetailId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|DetailFoto whereUpdatedAt($value)
  * @mixin \Eloquent
@@ -38,6 +40,7 @@ class DetailFoto extends Model
         'name',
         'thumb',
         'path',
+        'rotate',
     ];
 
     public function sheet_detail(): belongsTo
