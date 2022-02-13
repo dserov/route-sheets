@@ -61,7 +61,6 @@ class DetailPhotoController extends Controller
     }
 
     public function rotate($sheetDetail, $detailFoto) {
-      header('Content-type: application/json');
       $response =array(
         'message' => 'Что-то пошло не по плану.',
       );
@@ -70,13 +69,18 @@ class DetailPhotoController extends Controller
         if ($foto === null) throw new NotFoundHttpException('Foto not found');
         $this->authorize('delete', $foto);
 
-        $rotate = $foto->rotate + 1;
-        $rotate = ($rotate > 3 ? 0 : $rotate);
+        $basePath = \Storage::disk('public')->path('');
+        $filePath = $basePath . self::IMAGE_DIR . DIRECTORY_SEPARATOR . $foto->name;
+        $thumbPath = $basePath . self::THUMB_DIR . DIRECTORY_SEPARATOR . $foto->name;
 
-        $foto->rotate = $rotate;
-        $foto->save();
+        // save fullimage
+        $img = Image::make($thumbPath);
+        $img->rotate(270)->save($thumbPath);
 
-        $response['rotate'] = $rotate;
+        // save fullimage
+        $img = Image::make($filePath);
+        $img->rotate(270)->save($filePath);
+
         $response['message'] = '';
       } catch (NotFoundHttpException $notFoundHttpException) {
         $response['message'] = $notFoundHttpException->getMessage();

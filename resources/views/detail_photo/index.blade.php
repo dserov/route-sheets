@@ -33,8 +33,7 @@
                                 <div class="gallery__ramka">
                                     <a class="gallery__link" href="{{ $photo->path }}"
                                        data-caption="{{ \Carbon\Carbon::parse($photo->created_at)->locale('ru')->format('d.m.Y H:i:s') }}"
-                                       data-fancybox="gallery" style="transform: rotate({{ $photo->rotate * 90 }}deg)"
-                                       data-rotate="{{ $photo->rotate }}"
+                                       data-fancybox="gallery"
                                     >
                                         <img src="{{ $photo->thumb }}" class="gallery__img img-thumbnail"
                                              alt="{{ $photo->description }}">
@@ -102,46 +101,19 @@
           e.stopPropagation();
 
           let detailFoto = $(this).data('imageId');
-          let rotate = 1 * $(this).data('imageRotate');
-          let self = this;
 
           const url = '{{ route('sheet_detail::detail_photo::upload_photos', [ 'sheetDetail' => $sheet_detail ]) }}/' + detailFoto;
-          axios.post(url, {rotate: rotate})
+          axios.post(url, {})
             .then((response) => {
               if (response.data.message) {
                 alert(response.data.message);
                 return;
               }
-              // foto rotate
-              self.parentElement.querySelector('.gallery__link').style.transform = 'rotate(' + (response.data.rotate * 90) + 'deg)';
-              self.parentElement.querySelector('.gallery__link').dataset['rotate'] = parseInt(response.data.rotate);
-              console.log('rotate = ' + response.data.rotate);
+
+              window.location.reload();
             }, (error) => {
-              //     error callback
               console.log(error);
             });
-        });
-
-        Fancybox.bind('[data-fancybox]', {
-          caption: function (fancybox, carousel, slide) {
-            return (
-              `${slide.index + 1} / ${carousel.slides.length} <br />` + slide.caption
-            );
-          },
-          groupAll: true, // Group all items
-          on: {
-            // "*": (event, fancybox, slide) => {
-            // },
-            done: (fancybox, slide) => {
-              slide.$content.style.transform = `rotate(${slide.$trigger.dataset['rotate'] * 90}deg)`;
-              if(button = slide.$content.querySelector('button.carousel__button.is-close')) {
-                button.remove();
-              }
-            },
-          },
-          // Carousel: {
-          //
-          // },
         });
       });
 
