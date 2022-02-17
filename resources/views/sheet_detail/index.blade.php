@@ -124,22 +124,29 @@
 
         // установка сортировки и положения страницы по кукам
         let sheet_detail_sorting = Cookies.get('sheet_detail_sorting');
-        let sheet_detail_npp = Cookies.get('sheet_detail_npp');
-
         if (sheet_detail_sorting !== undefined) {
+          Cookies.set('sheet_detail_sorting', '', {
+            expires : -1,
+            path : '/',
+            domain : ''
+          });
           if (sheet_detail_sorting < 3) {
             try {$('input[name="sorting"][value=' + sheet_detail_sorting + ']').prop('checked', 'checked').change();} catch (e) {}
-            console.log('sheet_detail_sorting = ' + sheet_detail_sorting);
           }
         }
 
+        let sheet_detail_npp = Cookies.get('sheet_detail_npp');
         if (sheet_detail_npp !== undefined) {
+          Cookies.set('sheet_detail_npp', '', {
+            expires : -1,
+            path : '/',
+            domain : ''
+          });
           try {
             setTimeout(function () {
                 document.querySelector('a[name="npp' + sheet_detail_npp + '"]').scrollIntoView();
             }, 500);
           } catch (e) {}
-          console.log('sheet_detail_npp = ' + sheet_detail_npp);
         }
 
       });
