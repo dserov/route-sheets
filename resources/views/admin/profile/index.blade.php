@@ -7,7 +7,11 @@
                 <div class="card">
                     <div class="card-header d-md-flex">
                         <div class="flex-grow-1">
-                            {{ __('Users') }}
+                            @can('viewAny', \App\Models\User::class)
+                                {{ __('Users') }}
+                            @else
+                                {{ __('Profile') }}
+                            @endcan
                         </div>
                         <form class="form-inline my-2 my-lg-0">
                             <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" id="search_input">
@@ -56,38 +60,40 @@
                                             <span class="font-weight-bold">{{ __('Phone') }}: </span>
                                             <span class="user_phone">{{$user->phone}}</span>
                                         </div>
-                                        <div>
-                                            <span class="font-weight-bold">{{ __('Administrator') }}: </span>
-                                            @if($user->is_admin)
-                                                <span class="">{{__('Yes')}}</span>
-                                            @else
-                                                <span class="">{{ __('No') }}</span>
-                                            @endif
-                                        </div>
-                                        <div>
-                                            <span class="font-weight-bold">{{ __('Logistic') }}: </span>
-                                            @if($user->is_logistic)
-                                                <span class="">{{__('Yes')}}</span>
-                                            @else
-                                                <span class="">{{ __('No') }}</span>
-                                            @endif
-                                        </div>
-                                        <div>
-                                            <span class="font-weight-bold">{{ __('Driver') }}: </span>
-                                            @if($user->is_driver)
-                                                <span class="">{{__('Yes')}}</span>
-                                            @else
-                                                <span class="">{{ __('No') }}</span>
-                                            @endif
-                                        </div>
-                                        <div>
-                                            <span class="font-weight-bold">{{ __('Mapper') }}: </span>
-                                            @if($user->is_map)
-                                                <span class="">{{__('Yes')}}</span>
-                                            @else
-                                                <span class="">{{ __('No') }}</span>
-                                            @endif
-                                        </div>
+                                        @can('viewAny', \App\Models\User::class)
+                                            <div>
+                                                <span class="font-weight-bold">{{ __('Administrator') }}: </span>
+                                                @if($user->is_admin)
+                                                    <span class="">{{__('Yes')}}</span>
+                                                @else
+                                                    <span class="">{{ __('No') }}</span>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <span class="font-weight-bold">{{ __('Logistic') }}: </span>
+                                                @if($user->is_logistic)
+                                                    <span class="">{{__('Yes')}}</span>
+                                                @else
+                                                    <span class="">{{ __('No') }}</span>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <span class="font-weight-bold">{{ __('Driver') }}: </span>
+                                                @if($user->is_driver)
+                                                    <span class="">{{__('Yes')}}</span>
+                                                @else
+                                                    <span class="">{{ __('No') }}</span>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <span class="font-weight-bold">{{ __('Mapper') }}: </span>
+                                                @if($user->is_map)
+                                                    <span class="">{{__('Yes')}}</span>
+                                                @else
+                                                    <span class="">{{ __('No') }}</span>
+                                                @endif
+                                            </div>
+                                        @endcan
                                     </div>
                                     <div class="p-2 d-flex flex-column">
                                         <a href="{{route('admin::profile::update', ['user' => $user])}}"
