@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\DetailPhotoController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,5 +47,26 @@ class DetailFoto extends Model
     public function sheet_detail(): belongsTo
     {
         return $this->belongsTo(SheetDetail::class);
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        DetailFoto::deleted(function ($model){
+            self::delete_foto($model);
+        });
+    }
+
+    private static function delete_foto($detail_photo) {
+      $basePath = \Storage::disk('public')->path('');
+      $filePath = $basePath . DetailPhotoController::IMAGE_DIR . DIRECTORY_SEPARATOR . $detail_photo->name;
+      $thumbPath = $basePath . DetailPhotoController::THUMB_DIR . DIRECTORY_SEPARATOR . $detail_photo->name;
+      try {
+        \File::delete($filePath);
+      } catch (\Exception $e) {}
+      try {
+        \File::delete($thumbPath);
+      } catch (\Exception $e) {}
     }
 }

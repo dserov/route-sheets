@@ -36,6 +36,7 @@ Route::group([
 
     // delete sheet
     Route::delete('/{sheet}', [App\Http\Controllers\SheetController::class, 'delete'])->name('delete');
+    Route::delete('/', [App\Http\Controllers\SheetController::class, 'deleteByPeriod'])->name('delete_by_period');
 
     // show content sheet
     Route::get('/{sheet}/sheet_detail', [App\Http\Controllers\SheetDetailController::class, 'show'])->name('sheet_detail');
@@ -85,6 +86,7 @@ Route::group([
 ], function () {
     Route::get('/', [AdminExportController::class, 'index'])->name('index');
     Route::post('/', [AdminExportController::class, 'export'])->name('export');
+    Route::delete('/', [AdminExportController::class, 'delete'])->name('delete');
 });
 
 Route::get('/storage/{file}', function ($fileName) {

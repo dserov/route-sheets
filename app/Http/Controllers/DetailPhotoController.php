@@ -37,18 +37,7 @@ class DetailPhotoController extends Controller
         if ($foto === null) throw new NotFoundHttpException('Foto not found');
         $this->authorize('delete', $foto);
 
-        $basePath = \Storage::disk('public')->path('');
-        $filePath = $basePath . self::IMAGE_DIR . DIRECTORY_SEPARATOR . $foto->name;
-        $thumbPath = $basePath . self::THUMB_DIR . DIRECTORY_SEPARATOR . $foto->name;
-        try {
-          \File::delete($filePath);
-        } catch (\Exception $e) {}
-        try {
-          \File::delete($thumbPath);
-        } catch (\Exception $e) {}
-        try {
-          $foto->delete();
-        } catch (\Exception $e) {}
+        $foto->delete();
         $response['error'] = 'false';
         $response['message'] = 'Фотография удалена';
       } catch (NotFoundHttpException $notFoundException) {

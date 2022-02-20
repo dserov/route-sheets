@@ -29,11 +29,12 @@
                                 <i class="fa fa-calendar"></i>&nbsp;
                                 <span></span> <i class="fa fa-caret-down"></i>
                             </div>
-                            <form action="{{route('admin::export::export')}}" method="post">
+                            <form action="{{route('admin::export::export')}}" method="post" class="d-flex justify-content-between">
                                 @csrf
                                 <input type="hidden" name="from_date" value="" required>
                                 <input type="hidden" name="to_date" value="" required>
                                 <button class="btn btn-primary mt-4" type="submit">Скачать архив</button>
+                                <button class="btn btn-danger mt-4" type="button" id="delete_sheet">Удалить м.листы</button>
                             </form>
                     </div>
                 </div>
@@ -46,6 +47,27 @@
 
           var start = moment().subtract(29, 'days');
           var end = moment();
+
+          $('#delete_sheet').on('click', function (e) {
+            let from = $('input[name="from_date"]').val();
+            let to = $('input[name="to_date"]').val();
+
+            // if (!confirm('Удалить маршрутные листы за период ' + from  + ' - ' + to)) {
+            //   return;
+            // }
+
+            let url =  "{{route('sheet::delete_by_period')}}";
+            axios.post(url, {
+              _method: 'delete',
+              from: from,
+              to: to,
+            })
+              .then((response) => {
+                alert(response.data.message);
+              }, (error) => {
+                console.log(error);
+              });
+          });
 
           function cb(start, end) {
             $('#reportrange span').html(start.format('DD MMMM YYYY') + ' - ' + end.format('DD MMMM YYYY'));

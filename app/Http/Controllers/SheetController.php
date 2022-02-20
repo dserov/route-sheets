@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SheetRequest;
 use App\Models\Sheet;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SheetController extends Controller
 {
@@ -17,13 +20,14 @@ class SheetController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request->user()->can('viewAny', Sheet::class)) {
-            $sheets = Sheet::orderByDesc('data')->paginate(30);
-        } else {
-            $sheets = Sheet::orderByDesc('data')->where('user_id', \Auth::id())->paginate(30);
+        $sheets = Sheet::orderByDesc('data');
+        if (!$request->user()->can('viewAny', Sheet::class)) {
+            $sheets = $sheets->whereUserId(\Auth::id());
+            if ($request->user()->is_driver) {
+              $sheets = $sheets->whereData(Carbon::now()->format('Y-m-d'));
+            }
         }
-
-        $request->session()->put('sheet_page', $request->get('page'));
+        $sheets = $sheets->paginate(30);
 
         return view('sheet.index', [
             'sheets' => $sheets,
@@ -47,10 +51,16 @@ class SheetController extends Controller
         return response()->json(['html' => $html]);
     }
 
+    /**
+   * @param Sheet $sheet
+   * @param Request $request
+   * @return \Illuminate\Http\RedirectResponse
+   * @throws AuthorizationException
+   */
     public function delete(Sheet $sheet, Request $request)
     {
         $this->authorize('delete', $sheet);
-        $sheet->delete();
+        $this->deleteCascade($sheet);
         return back()->with('status', __('List deleted'));
     }
 
@@ -75,5 +85,52 @@ class SheetController extends Controller
         $sheet->fill($request->validated());
         $sheet->saveOrFail();
         return response()->redirectToRoute('sheet::index')->with('status', __('Sheet saved!'));
+    }
+
+    public function deleteByPeriod(Request $request)
+  {
+    $from = Carbon::createFromFormat('d/m/Y', $request->input('from'));
+    $to = Carbon::createFromFormat('d/m/Y', $request->input('to'));
+    header('Content-type: application/json');
+    $response =array(
+      'message' => 'Что-то пошло не по плану.',
+      'error' => 'true',
+    );
+    try {
+      if (!$from || !$to) {
+        throw new \Exception('Формат входных дат не верный');
+      }
+
+      $sheets = Sheet::query()->whereBetween('data', [ $from->format('Y-m-d'), $to->format('Y-m-d')])
+        ->with(['sheet_details', 'sheet_details.detail_fotos'])
+        ->get();
+      $sheets = $sheets->filter(function ($sheet) use ($request){
+        return $request->user()->can('delete', $sheet);
+      });
+
+      $sheets->each(function ($sheet) {
+        $this->deleteCascade($sheet);
+      });
+
+      $response['error'] = 'false';
+      $response['message'] = 'Листы удалены!';
+    } catch (NotFoundHttpException $notFoundException) {
+      $response['message'] = 'Лист не найден';
+    } catch (AuthorizationException $authorizationException) {
+      $response['message'] = 'У вас нет прав делать это';
+    } catch (\Exception $exception) {
+      $response['message'] = $exception->getMessage();
+    }
+    return json_encode($response);
+  }
+
+    public function deleteCascade($sheet) {
+      $sheet->sheet_details->each(function ($sheet_detail){
+        $sheet_detail->detail_fotos->each(function ($detail_foto){
+          $detail_foto->delete();
+        });
+        $sheet_detail->delete();
+      });
+      $sheet->delete();
     }
 }

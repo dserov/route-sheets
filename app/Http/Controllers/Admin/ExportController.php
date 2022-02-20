@@ -7,6 +7,7 @@ use App\Http\Controllers\DetailPhotoController;
 use App\Http\Requests\ExportRequest;
 use App\Models\DetailFoto;
 use App\Models\Sheet;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ExportController extends Controller
@@ -24,8 +25,8 @@ class ExportController extends Controller
   public function export(ExportRequest $request)
   {
     try {
-      $dateFrom = \DateTime::createFromFormat('d/m/Y', $request->input('from_date'));
-      $dateTo = \DateTime::createFromFormat('d/m/Y', $request->input('to_date'));
+      $dateFrom = Carbon::createFromFormat('d/m/Y', $request->input('from_date'));
+      $dateTo = Carbon::createFromFormat('d/m/Y', $request->input('to_date'));
 
       $rows = Sheet::whereBetween('data', [$dateFrom->format('Y/m/d'), $dateTo->format('Y/m/d')])
         ->whereNotNull('user_id')
@@ -73,7 +74,7 @@ class ExportController extends Controller
         // files not found
         return redirect()
           ->route('admin::export::index')
-          ->with('status', 'Файлы для выгрузки за указанный период не найдены!');
+          ->with('status', sprintf('Файлы для выгрузки за период %s-%s не найдены!', $dateFrom->format('d.m.Y'), $dateTo->format('d.m.Y')));
       }
 
       // make zip archive
