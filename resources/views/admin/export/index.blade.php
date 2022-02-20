@@ -52,9 +52,9 @@
             let from = $('input[name="from_date"]').val();
             let to = $('input[name="to_date"]').val();
 
-            // if (!confirm('Удалить маршрутные листы за период ' + from  + ' - ' + to)) {
-            //   return;
-            // }
+            if (!confirm('Удалить маршрутные листы за период ' + from  + ' - ' + to + ' ?')) {
+              return;
+            }
 
             let url =  "{{route('sheet::delete_by_period')}}";
             axios.post(url, {
