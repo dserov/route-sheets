@@ -124,7 +124,7 @@ class SheetImportController extends Controller
             'фев',
             'мар',
             'апр',
-            'май',
+            'мая',
             'июн',
             'июл',
             'авг',
