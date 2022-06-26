@@ -14,6 +14,7 @@ class GeoPoint extends Model
         'name',
         'description',
         'point',
+        'radius',
     ];
 
     public function uts()
@@ -24,20 +25,22 @@ class GeoPoint extends Model
     public function getAsJson()
     {
         $points = self::all();
+//        $points = self::query()->with(['uts'])->get();
         $data = [];
         foreach ($points as $point) {
             $data[] = [
                 'id' => $point->id,
                 'name' => $point->name,
                 'description' => $point->description,
-                'geometry' => $this->_makeGeoObject($point->point),
+                'geometry' => self::makeGeoObject($point->point, $point->radius),
+//                'uts' => json_encode($point->uts)
             ];
         }
 
         return $data;
     }
 
-    private function _makeGeoObject($pointList)
+    static public function makeGeoObject($pointList, $radius)
     {
         $pointList = unserialize($pointList);
         if (!is_array($pointList)) {
@@ -52,6 +55,15 @@ class GeoPoint extends Model
                 ],
             ];
         }
+
+        if ($radius > 0) {
+          return [
+              'type' => 'Circle',
+              'coordinates' => $pointList,
+              'radius' => $radius,
+          ];
+        }
+
         return [
             'type' => 'Point',
             'coordinates' => $pointList,

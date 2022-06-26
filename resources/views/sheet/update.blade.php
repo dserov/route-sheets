@@ -68,3 +68,8 @@
         });
     </script>
 @endsection
+
+@section('head_scripts')
+    <link href="{{ asset('css/select2.min.css') }}" rel="stylesheet" />
+    <script src="{{ asset('js/select2.min.js') }}" defer></script>
+@endsection

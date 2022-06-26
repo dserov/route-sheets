@@ -24,8 +24,8 @@ class StoreGeoListRequest extends FormRequest
     public function rules()
     {
         return [
-            'geo_list' => 'file|max:16384',
-            'ut_list' => 'file|max:16384',
+            'geo_list' => 'file|max:32768',
+            'ut_list' => 'file|max:32768',
         ];
     }
 }

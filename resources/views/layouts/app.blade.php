@@ -19,8 +19,8 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script></head>
+    @yield('head_scripts')
+</head>
 <body>
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
@@ -40,6 +40,11 @@
                     <li class="nav-item">
                         <a href="{{ route('sheet::index') }}" class="nav-link">
                             {{ __('Sheets') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('monitoring::index') }}" class="nav-link">
+                            {{ __('Monitoring') }}
                         </a>
                     </li>
                     @can('create', \App\Model\GeoPoint::class)

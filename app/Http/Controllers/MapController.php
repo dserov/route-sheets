@@ -46,6 +46,25 @@ class MapController extends Controller
         return (string)\Str::of($string)->trim();
     }
 
+  /**
+   * @param \SimpleXMLElement $nodes []
+   * @param string $attrributeName
+   * @return int|string
+   */
+    private function getSingleAttribute($nodes, $attrributeName = '')
+    {
+        if ($nodes === false || empty($nodes) || $attrributeName === '') {
+            return '';
+        }
+
+        $string = '';
+        if ($nodes[0]->attributes() && isset($nodes[0]->attributes()[$attrributeName])) {
+          $string = (string)($nodes[0]->attributes()[$attrributeName]);
+        }
+        $string = preg_replace('/[\x00-\x1F]/', '', $string);
+        return (string)\Str::of($string)->trim();
+    }
+
     /**
      * Преобразует строку координат в массив, или многомерный массив
      *
@@ -188,6 +207,7 @@ class MapController extends Controller
             $name = $this->getSingleValue($placemark->xpath('name'));
             $description = $this->getSingleValue($placemark->xpath('description'));
             $point = $this->_convertStringCoordinatesToArray($this->getSingleValue($placemark->xpath('Point/coordinates')));
+            $radius = (int) $this->getSingleAttribute($placemark->xpath('description'), 'width');
             $polygon = $this->_convertStringCoordinatesToArray($this->getSingleValue($placemark->xpath('Polygon/outerBoundaryIs/LinearRing/coordinates')));
             if (empty($polygon) && empty($point)) {
                 \Log::debug('Entry is invalid' . $name);
@@ -202,6 +222,7 @@ class MapController extends Controller
                     'name' => $name,
                     'description' => $description,
                     'point' => serialize(array_merge($point, $polygon)),
+                    'radius' => $radius,
                 ];
             }
         }

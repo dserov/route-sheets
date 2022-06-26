@@ -54,6 +54,18 @@ Route::group([
 });
 
 Route::group([
+    'prefix' => 'monitoring',
+    'as' => 'monitoring::',
+    'middleware' => ['auth'],
+], function (){
+    Route::get('/', [App\Http\Controllers\MonitoringController::class, 'index'])->name('index');
+    Route::get('/balloon/{geoZoneId}', [App\Http\Controllers\MonitoringController::class, 'balloon'])->name('balloon');
+    Route::get('/geo', [App\Http\Controllers\MonitoringController::class, 'geo'])->name('geo');
+    Route::get('/geoDistance', [App\Http\Controllers\MonitoringController::class, 'geoDistance'])->name('geoDistance');
+    Route::get('/test', [App\Http\Controllers\MonitoringController::class, 'test'])->name('test');
+});
+
+Route::group([
     'prefix' => 'sheetdetail',
     'as' => 'sheet_detail::',
     'middleware' => ['auth'],
