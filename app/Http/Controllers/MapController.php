@@ -203,6 +203,7 @@ class MapController extends Controller
         $placemarks = $xml->xpath('Document/Placemark');
         $invalidEntry = [];
         $id = 1;
+        $descriptions = [];
         foreach ($placemarks as $placemark) {
             $name = $this->getSingleValue($placemark->xpath('name'));
             $description = $this->getSingleValue($placemark->xpath('description'));
@@ -216,15 +217,25 @@ class MapController extends Controller
             }
 
             // строки без номера договора игнорируем
-            if (\Str::contains($description, self::PREFIX)) {
-                $data[] = [
-                    'id' => $id++,
-                    'name' => $name,
-                    'description' => $description,
-                    'point' => serialize(array_merge($point, $polygon)),
-                    'radius' => $radius,
-                ];
+            if (! \Str::contains($description, self::PREFIX)) {
+              continue;
             }
+
+            if (isset($descriptions[$description])) {
+              continue;
+            }
+
+            $item = [
+                'id' => $id++,
+                'name' => $name,
+                'description' => $description,
+                'point' => serialize(array_merge($point, $polygon)),
+                'radius' => $radius,
+            ];
+
+            // save data
+            $data[] = $item;
+            $descriptions[$description] = true;
         }
 
         if (!empty($invalidEntry)) {

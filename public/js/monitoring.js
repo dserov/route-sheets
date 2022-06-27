@@ -22,6 +22,9 @@ let makeVehiclesListItem = function (id) {
     node: null, // ссылка на узел в дереве
     direction: 6, // угол поворота машинки по часовой стрелке 0-7 (0-360 разделен на секторы от 0-8)
     statusType: 1, // 3 - alarm, io, 1 - offline, 0 - online, parkaccon, stopaccof, stopaccon
+    status: {
+      online: false,
+    },
     vehicleType: 1, // тип иконки машинки. 1 - лековая, 2 грузовая и т.п.
     vehicleMark: null, // если null - машинка по карте не ездит
     vehiclePoint: { // координаты машинки на карте
@@ -30,9 +33,13 @@ let makeVehiclesListItem = function (id) {
     },
     geoCircle: null, // список геообъектов, в текущий момент в поле радиуса машинки
 
+    setStatusOnline: function(online) {
+      this.status.online = (online !== undefined && online); // true - online
+    },
+
     /** обновление иконки, только, если произошла смена статуса.
-    *   response - status item from StandardApiAction_getDeviceStatus.action
-    */
+     *   response - status item from StandardApiAction_getDeviceStatus.action
+     */
     setStatusType: async function (response) {
       // update direction
       let newDirection;
@@ -45,7 +52,8 @@ let makeVehiclesListItem = function (id) {
       let needUpdateIcon = this.direction !== newDirection;
 
       // status type
-      let newStatusType = (response.ol * 1 > 0 ? 0 : 1); // 0 - online, 1 = offline
+      this.setStatusOnline(response.ol * 1 > 0);
+      let newStatusType = (this.isOnline() ? 0 : 1); // 0 - online, 1 = offline
 
       needUpdateIcon = needUpdateIcon || (this.statusType !== newStatusType);
 
@@ -56,6 +64,10 @@ let makeVehiclesListItem = function (id) {
         await this.updateMapIcon();
         await this.updateNodeIcon();
       }
+    },
+
+    isOnline: function() {
+      return this.status.online;
     },
 
     updateNodeIcon: function (online) {
@@ -86,8 +98,8 @@ let makeVehiclesListItem = function (id) {
       lat *= 1;
       lng *= 1;
       if (lat === 0 || lng === 0) {
-        console.log('lat is empty', lat);
-        console.log('lng is empty', lng);
+        // console.log('lat is empty', lat);
+        // console.log('lng is empty', lng);
         return;
       }
 
@@ -108,7 +120,6 @@ let makeVehiclesListItem = function (id) {
     moveVehicle: async function (lat, lng) {
       // сверим координаты. нет смысла двигать машинку, если она стоит на месте
       if (this.vehiclePoint.lat != lat || this.vehiclePoint.lng != lng) {
-        console.log('move vehicle');
         // передвинем машинку и радиус
         try {
           if (this.vehicleMark) {
@@ -149,16 +160,6 @@ let makeVehiclesListItem = function (id) {
 
         this.vehiclePoint.lat = lat;
         this.vehiclePoint.lng = lng;
-        this.vehicleMark = new ymaps.Placemark([lat, lng], properties, {
-          iconLayout: 'default#imageWithContent',
-          iconImageHref: MAPIMAGEPATH + this.getVehicleImage(),
-          iconImageSize: [32, 32],
-          iconImageOffset: [-16, -16],
-          // Смещение слоя с содержимым относительно слоя с картинкой.
-          iconContentOffset: [0, 32],
-          iconContentLayout: myIconContentLayout,
-        });
-        await map.geoObjects.add(this.vehicleMark);
 
         // circle for find objects
         this.geoCircle = new ymaps.Circle([[lat, lng], 500], properties, {
@@ -168,8 +169,20 @@ let makeVehiclesListItem = function (id) {
         await map.geoObjects.add(this.geoCircle);
 
         // покажем только те объекты, что в выбранной области
-        geoStorage.searchInside(this.geoCircle).search('properties.geoType == "geoZone"').setOptions('visible', isVisibleGeoZones);
-        geoStorage.searchInside(this.geoCircle).search('properties.geoType == "geoLabel"').setOptions('visible', isVisibleGeoZones && isLabelOnGeoZones);
+        await geoStorage.searchInside(this.geoCircle).search('properties.geoType == "geoZone"').setOptions('visible', isVisibleGeoZones);
+        await geoStorage.searchInside(this.geoCircle).search('properties.geoType == "geoLabel"').setOptions('visible', isVisibleGeoZones && isLabelOnGeoZones);
+
+        // добавление машинки на карту
+        this.vehicleMark = new ymaps.Placemark([lat, lng], properties, {
+          iconLayout: 'default#imageWithContent',
+          iconImageHref: MAPIMAGEPATH + this.getVehicleImage(),
+          iconImageSize: [32, 32],
+          iconImageOffset: [-16, -16],
+          // Смещение слоя с содержимым относительно слоя с картинкой.
+          iconContentOffset: [-16, 32],
+          iconContentLayout: myIconContentLayout,
+        });
+        await map.geoObjects.add(this.vehicleMark);
       } catch (e) {
       }
     },
@@ -247,9 +260,10 @@ let makeVehiclesListItem = function (id) {
           /*if (this.isWeightVehi()) {
               // 待处理！李德超
               data.image = 9;
-          } else*/ if (this.isParkedNew()) {
+          } else*/
+          if (this.isParkedNew()) {
             data.image = 10;	//停车
-          }  else {//判断是否为静止，并且ACC开启  怠速
+          } else {//判断是否为静止，并且ACC开启  怠速
             if (this.isIdling()) {
               data.image = 9;	//停车未熄火
             }
@@ -281,7 +295,8 @@ window.addEventListener('load', function () {
   initVideoTab();
 
   // запустим сервис обновления статусов всех машинок
-//  setTimeout(updateVehiclesStatusAndPosition, 5000);
+  updateVehiclesStatusAndPosition();
+  setInterval(updateVehiclesStatusAndPosition, 7000);
 });
 
 function initMap() {
@@ -298,10 +313,15 @@ function initMap() {
   addAllGeoObjectsToMap();
 
   map.geoObjects.events.add('click', function (event) {
-    let target, geoZoneId, balloonContent;
+    let target, geoZoneId, balloonContent, geoType;
     try {
       target = event.get('target');
       geoZoneId = target.properties.get('geoPointId');
+      geoType = target.properties.get('geoType');
+      if (geoType !== 'geoZone' && geoType !== 'geoLabel') {
+        // клик не по геозоне или ее подписи
+        return;
+      }
       balloonContent = target.properties.get('balloonContent');
     } catch (e) {
       return;
@@ -339,7 +359,16 @@ function initMap() {
 function addAllGeoObjectsToMap() {
   let geoZones = [];
   let myIconContentLayout = ymaps.templateLayoutFactory.createClass(
-    '<div style="color: #FFFFFF; font-weight: bold;">{{properties.iconCaption}}</div>'
+    '<div style="    font-weight: 700;\n' +
+    '    background-color: #e3e3e3;\n' +
+    '    border-radius: 5px;\n' +
+    '    padding: 1px 5px;\n' +
+    '    font-size: 11px;\n' +
+    '    color: blue;\n' +
+    '    border: 1px solid blue;\n' +
+    '    white-space: nowrap;\n' +
+    '    transform: translateX(-50%);\n' +
+    '    display: inline-block;">{{properties.iconCaption}}</div>'
   );
   geo_list.forEach(function (item) {
     geoZones.push(
@@ -366,19 +395,34 @@ function addAllGeoObjectsToMap() {
     geometry.type = "Point";
     geometry.radius = undefined;
     geoZones.push(
-      new ymaps.GeoObject(
-        {
-          geometry: geometry,
-          properties: {
-            iconCaption: item.name,
-            geoPointId: item.id,
-            geoType: 'geoLabel',
-          },
-          options: {
-            preset: 'islands#darkBlueStretchyIcon',
-          }
-        }
-      )
+      new ymaps.Placemark(item.geometry.coordinates, {
+        iconContent: item.name,
+        iconCaption: item.name,
+        geoPointId: item.id,
+        geoType: 'geoLabel',
+      }, {
+        iconLayout: 'default#imageWithContent',
+        iconImageHref: '/img/dot.png',
+        iconImageSize: [1, 1],
+        iconImageOffset: [-1, -1],
+        // Смещение слоя с содержимым относительно слоя с картинкой.
+        iconContentOffset: [0, -8],
+        iconContentLayout: myIconContentLayout,
+      })
+      // new ymaps.GeoObject(
+      //   {
+      //     geometry: geometry,
+      //     properties: {
+      //       iconContent: item.name,
+      //       iconCaption: item.name,
+      //       geoPointId: item.id,
+      //       geoType: 'geoLabel',
+      //     },
+      //     options: {
+      //       preset: 'islands#darkBlueStretchyIcon',
+      //     }
+      //   }
+      // )
     );
   });
   geoStorage = ymaps.geoQuery(geoZones).setOptions('visible', false).addToMap(map);
@@ -477,7 +521,8 @@ async function updateGeoZones() {
           // покажем объекты в радиусе
           await geoStorage.searchInside(vehicle.geoCircle).search('properties.geoType == "geoZone"').setOptions('visible', isVisibleGeoZones);
           await geoStorage.searchInside(vehicle.geoCircle).search('properties.geoType == "geoLabel"').setOptions('visible', isVisibleGeoZones && isLabelOnGeoZones);
-        } catch (e) {}
+        } catch (e) {
+        }
       }
     });
   } else {
@@ -521,6 +566,22 @@ function moveToNode(id) {
     }
 
     let vehicle = vehiclesList[idx];
+    if (!vehicle.vehiclePoint.lat || !vehicle.vehiclePoint.lng) {
+      let li = vehicle.node.li;
+      jQuery(li).popover({
+        container: document.body,
+        trigger: 'focus',
+        content: '<strong>Координаты для \'' + vehicle.title + '\' отсутствуют!</strong>',
+        title: '<strong>Information</strong>',
+        animation: true,
+        placement: 'left',
+        html: true,
+      });
+      jQuery(li).popover('show');
+      setTimeout(function() {jQuery(li).popover('dispose');}, 5000);
+      return;
+    }
+
     if (vehicle.geoCircle === null) {
       return;
     }
@@ -551,10 +612,10 @@ async function reloadTree() {
       // );
 
       // отфильтруем машинки
-//        await updateVehiclesOnMap();
+      await updateVehiclesStatusAndPosition();
 
       // переместим карту
-//        moveMapToLastVehicle(data.node);
+      moveMapToLastVehicle(data.node);
     },
     dblclick: function (event, data) {
       playVideoFromThisNode(data.node);
@@ -583,35 +644,51 @@ async function reloadTree() {
   }
 }
 
+function updateRootNodeTitle() {
+  try {
+    let online = vehiclesList.filter(vehicle => vehicle.isOnline()).length;
+    let total = vehiclesList.length;
+    let rootNode = findNodeById(0);
+
+    rootNode.title = `Monitoring center (${online}/${total})`;
+    rootNode.renderTitle();
+  } catch (e) {}
+}
+
 async function updateVehiclesStatusAndPosition() {
   if (isUpdateVehiclesStatusAndPositionInProgress) {
     return;
   }
   isUpdateVehiclesStatusAndPositionInProgress = true;
 
-  let idList = vehiclesList.map(item => item.id);
-  if (idList.length === 0) {
-    isUpdateVehiclesStatusAndPositionInProgress = false;
-    return;
-  }
-
-  let data = await getDataFromVideoServer('/StandardApiAction_getDeviceStatus.action', {
-    jsession: Cookies.get('jsession'),
-    devIdno: idList.join(','),
-    toMap: 1,
-    language: 'en',
-  });
-  data.status.forEach(async function (response) {
-    let objIndex = vehiclesList.findIndex(obj => obj.id === response.id);
-    if (objIndex === -1) {
+  try {
+    let idList = vehiclesList.map(item => item.id);
+    if (idList.length === 0) {
+      isUpdateVehiclesStatusAndPositionInProgress = false;
       return;
     }
 
-    // нужно ли сменить иконки на карте и в дереве машинок
-    vehiclesList[objIndex].setStatusType(response);
+    let data = await getDataFromVideoServer('/StandardApiAction_getDeviceStatus.action', {
+      jsession: Cookies.get('jsession'),
+      devIdno: idList.join(','),
+      toMap: 1,
+      language: 'en',
+    });
+    data.status.forEach(async function (response) {
+      let objIndex = vehiclesList.findIndex(obj => obj.id === response.id);
+      if (objIndex === -1) {
+        return;
+      }
 
-    await vehiclesList[objIndex].updatePosition(response.mlat, response.mlng);
-  });
+      // нужно ли сменить иконки на карте и в дереве машинок
+      vehiclesList[objIndex].setStatusType(response);
+
+      await vehiclesList[objIndex].updatePosition(response.mlat, response.mlng);
+    });
+
+    updateRootNodeTitle();
+  } catch (e) {
+  }
 
   isUpdateVehiclesStatusAndPositionInProgress = false;
 }
